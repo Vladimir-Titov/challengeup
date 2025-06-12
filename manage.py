@@ -7,11 +7,12 @@ def create_server():
     app = AppBuilder.create_app()
     config = uvicorn.Config(
         app,
-        port=5000,
+        port=5000,  # todo: move to settings, all vars
         log_level='info',
         reload=True,
-        reload_delay=1,
         loop='uvloop',
+        use_colors=True,
+        log_config='log_cfg.yaml',
     )
     server = uvicorn.Server(config)
     return server
