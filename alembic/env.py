@@ -1,5 +1,5 @@
 from utils.migrations.alembic import run_alembic
-from app.models.challenges import Challenges
+from app.models import challenges_schema, Challenges
 
 
 run_alembic(
