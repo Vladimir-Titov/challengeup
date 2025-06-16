@@ -79,7 +79,7 @@ def run_migrations_online(target_metadata, version_table_schema):
             context.run_migrations()
 
 
-def run_alembic(
+def run_migrations(
     sqlalchemy_url: str,
     target_metadata: MetaData | Sequence[MetaData],
     version_table_schema: str | None = None,

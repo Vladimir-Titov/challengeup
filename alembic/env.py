@@ -1,8 +1,8 @@
-from utils.migrations.alembic import run_alembic
-from app.models import challenges_schema, Challenges
+from core.migrations.alembic import run_migrations
+from app.models import challenges_schema
 
 
-run_alembic(
+run_migrations(
     sqlalchemy_url='postgresql://postgres:postgres@localhost:54010/postgres',
-    target_metadata=Challenges.metadata,
+    target_metadata=challenges_schema,
 )
