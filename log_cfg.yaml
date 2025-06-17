@@ -2,8 +2,14 @@ version: 1
 disable_existing_loggers: False
 formatters:
   default:
-    "()": uvicorn.logging.DefaultFormatter
-    format: '[%(asctime)s] | %(levelname)s | %(message)s'
+    "()": colorlog.ColoredFormatter
+    format: "%(log_color)s[%(asctime)s] | %(levelname)s | %(message)s"
+    log_colors:
+      DEBUG:    green
+      INFO:     cyan
+      WARNING:  yellow
+      ERROR:    red
+      CRITICAL: red,bg_white
   access:
     "()": colorlog.ColoredFormatter
     format: "%(log_color)s[%(asctime)s] | %(levelname)s | %(message)s"
@@ -24,12 +30,22 @@ handlers:
     stream: ext://sys.stdout
 loggers:
   uvicorn.error:
-    level: INFO
+    level: DEBUG
     handlers:
       - default
     propagate: no
   uvicorn.access:
-    level: INFO
+    level: DEBUG
     handlers:
       - access
     propagate: no
+  __main__:
+    level: DEBUG
+    handlers:
+      - default
+    propagate: no
+root:
+  level: DEBUG
+  handlers:
+    - default
+  propagate: yes
