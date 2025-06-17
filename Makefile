@@ -21,6 +21,9 @@ fix:
 	@ruff check . --fix
 	@ruff format .
 
+check:
+	@mypy .
+
 clean:
 	@rm -rf `find . -name __pycache__`
 	@rm -f `find . -type f -name '*.py[co]' `
