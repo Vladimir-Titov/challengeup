@@ -16,7 +16,7 @@ def compile_query(query):
     mapping = {key: '$' + str(number) for number, (key, _) in enumerate(compiled_params, start=1)}
     new_query = compiled.string % mapping
     new_params = [val for key, val in compiled_params]
-    logger.debug('\n%s', compiled.string, compiled.params)
+    logger.debug('\n%s', compiled.string % compiled.params)
     return new_query, new_params
 
 
@@ -37,8 +37,8 @@ def search(
     base_query: Select | None = None,
 ) -> Select:
     if base_query is None:
-        query = table.select()
-        column_getter = table.columns.__getitem__
+        query = Select(table)
+        column_getter = query.columns.__getitem__
     else:
         query = base_query.select()
         column_getter = sa.column

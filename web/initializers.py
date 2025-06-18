@@ -5,6 +5,7 @@ from starlette.applications import Starlette
 
 logger = logging.getLogger(__name__)
 
+
 @asynccontextmanager
 async def some_init_job(app: Starlette):
     async with AsyncConnectionPool(

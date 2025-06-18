@@ -4,6 +4,7 @@ from typing import Any, AsyncGenerator
 
 from psycopg import AsyncConnection, Connection
 from psycopg_pool import AsyncConnectionPool
+from psycopg.rows import dict_row
 
 from core.repositories.query import compile_query
 
@@ -24,6 +25,7 @@ class DBRepository:
 
         if isinstance(con, AsyncConnectionPool):
             async with con.connection() as conn:
+                conn.row_factory = dict_row
                 db_ctx.set(conn)
                 try:
                     yield conn
@@ -36,19 +38,26 @@ class DBRepository:
             async with con.transaction():
                 yield con
 
-    async def fetch(self, query) -> list[dict]:
+    async def fetchall(self, query) -> list[dict]:
         compiled_query, compiled_params = compile_query(query)
         async with self.connection() as con:
-            records = await con.fetch(compiled_query, *compiled_params)
-            return [dict(record) for record in records]
+            async with con.cursor() as cur:
+                records = await cur.execute(compiled_query, *compiled_params)
+                records = await records.fetchall()
+                return records
 
-    async def fetchrow(self, query) -> dict | None:
+    async def fetchone(self, query) -> dict | None:
         compiled_query, compiled_params = compile_query(query)
         async with self.connection() as con:
-            record = await con.fetchrow(compiled_query, *compiled_params)
-            return dict(record) if record else None
+            async with con.cursor() as cur:
+                result = await cur.execute(compiled_query, *compiled_params)
+                record = await result.fetchone()
+                return record
 
     async def fetchval(self, query) -> Any:
         compiled_query, compiled_params = compile_query(query)
         async with self.connection() as con:
-            return await con.fetchval(compiled_query, *compiled_params)
+            async with con.cursor() as cur:
+                result = await cur.execute(compiled_query, *compiled_params)
+                value = await result.fetchone()
+                return value[0] if value else None

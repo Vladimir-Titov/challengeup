@@ -1,11 +1,12 @@
-import uuid
 from sqlalchemy import String
-from sqlmodel import SQLModel, Field
+from sqlmodel import Field
+
+from core.types.pydantic_base import BaseUjsonModel
 
 from .base import Base, challenges_schema
 
 
-class Challenges(Base, table=True):
+class Challenges(Base, BaseUjsonModel, table=True):
     metadata = challenges_schema
 
     title: str = Field(sa_type=String)
