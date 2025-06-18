@@ -71,7 +71,6 @@ def get_by_id(table: sa.Table, entity_id: int | UUID | str) -> Select:
 
 
 def update(table: sa.Table, **kwargs) -> sa.Update:
-    """Base query builder for update rows. Don't use it without filters!"""
     return table.update().values(updated=datetime.datetime.now(datetime.UTC), **kwargs).returning(table)
 
 
