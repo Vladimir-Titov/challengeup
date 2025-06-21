@@ -8,7 +8,7 @@ def app_lifespan(lifespans: list):
         exit_stack = contextlib.AsyncExitStack()
         async with exit_stack:
             for lifespan in lifespans:
-                await exit_stack.enter_async_context(lifespan(app))
+                yield await exit_stack.enter_async_context(lifespan(app))
             yield
 
     return _lifespan_manager
