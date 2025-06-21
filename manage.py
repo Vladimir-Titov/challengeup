@@ -3,7 +3,7 @@ import logging
 import signal
 import uvicorn
 import uvloop
-import yaml
+import yaml  # type: ignore
 from typing import Optional
 
 from web.create_app import AppBuilder
@@ -31,11 +31,10 @@ async def shutdown_server(server: uvicorn.Server):
     logger.info('Shutting down server...')
     server.should_exit = True
     await server.shutdown()
-    server.exit_code = 0
 
 
 def handle_exit(server: Optional[uvicorn.Server], loop: Optional[asyncio.AbstractEventLoop]):
-    if server:
+    if server and loop:
         asyncio.run_coroutine_threadsafe(shutdown_server(server), loop)
     if loop:
         loop.stop()

@@ -32,12 +32,19 @@ skip-magic-trailing-comma = false
 line-ending = "auto"
 
 [tool.mypy]
-python_version = "3.9"
+python_version = "3.12"
 warn_return_any = true
 warn_unused_configs = true
+disable_error_code = ["misc"]
+
+[[tool.mypy.overrides]]
+module = "asyncpg"
+ignore_missing_imports = true
 
 [dependency-groups]
 dev = [
+    "autotyping>=24.9.0",
     "mypy>=1.16.1",
+    "pyannotate>=1.2.0",
     "ruff>=0.11.13",
 ]

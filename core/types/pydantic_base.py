@@ -3,10 +3,12 @@ from enum import Enum
 from typing import Any, Dict
 from uuid import UUID
 
-from pydantic import BaseModel, model_serializer
+from pydantic import BaseModel, model_serializer, ConfigDict
 
 
 class BaseUjsonModel(BaseModel):
+    model_config = ConfigDict(arbitrary_types_allowed=True)
+
     @model_serializer
     def serialize_custom_types(self) -> Dict[str, Any]:
         """Serialize custom types to json. Pydantic does not support json_encoders in v2."""
@@ -15,9 +17,6 @@ class BaseUjsonModel(BaseModel):
             serialized_fields[field] = serialize_custom_types(getattr(self, field))
 
         return serialized_fields
-
-    class Config:
-        arbitrary_types_allowed = True
 
 
 def serialize_custom_types(data: Any):

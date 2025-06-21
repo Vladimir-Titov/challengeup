@@ -81,10 +81,11 @@ def run_migrations_online(target_metadata, version_table_schema):
 
 def run_migrations(
     sqlalchemy_url: str,
-    target_metadata: MetaData | Sequence[MetaData],
+    target_metadata: MetaData | list[MetaData],
     version_table_schema: str | None = None,
 ):
-    fileConfig(config.config_file_name)
+    if config.config_file_name:
+        fileConfig(config.config_file_name)
 
     config.set_main_option('sqlalchemy.url', sqlalchemy_url)
 

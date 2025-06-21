@@ -1,5 +1,6 @@
 import datetime
 from logging import getLogger
+from typing import Any, Callable
 from uuid import UUID
 
 import sqlalchemy as sa
@@ -10,7 +11,7 @@ logger = getLogger(__name__)
 dialect = PGDialectAsync_psycopg(paramstyle='pyformat')
 
 
-def compile_query(query):
+def compile_query(query: ClauseElement) -> tuple[str, list[Any]]:
     compiled = query.compile(dialect=dialect, compile_kwargs={'render_postcompile': True})
     compiled_params = sorted(compiled.params.items())
     mapping = {key: '$' + str(number) for number, (key, _) in enumerate(compiled_params, start=1)}
@@ -20,14 +21,13 @@ def compile_query(query):
     return new_query, new_params
 
 
-
-def create(table: sa.Table, payload: dict) -> sa.Insert:
+def create(table: sa.Table, payload: dict | list[dict]) -> sa.Insert:
     return table.insert().values(payload).returning(table)
 
 
-def count(table: sa.Table, base_query: ClauseElement | None = None) -> Select:
+def count(table: sa.Table, base_query: ClauseElement | None = None) -> Select[tuple[int]]:
     source = base_query if base_query is not None else table
-    return sa.select([sa.func.count()]).select_from(source)
+    return sa.select(sa.func.count()).select_from(source)  # type: ignore[arg-type]
 
 
 def search(
@@ -38,8 +38,8 @@ def search(
     base_query: Select | None = None,
 ) -> Select:
     if base_query is None:
-        query = Select(table)
-        column_getter = query.columns.__getitem__
+        query: Select = sa.select(table)
+        column_getter: Callable[[str], Any] = query.columns.__getitem__
     else:
         query = base_query.select()
         column_getter = sa.column
@@ -58,9 +58,9 @@ def search(
     return query
 
 
-def _add_order_to_query(query: Select, order_by: str, column_getter) -> Select:
+def _add_order_to_query(query: Select, order_by: str, column_getter: Callable[[str], Any]) -> Select:
     if order_by.startswith('-'):
-        order_by_column = sa.desc(column_getter(order_by[1:]))
+        order_by_column: Any = sa.desc(column_getter(order_by[1:]))
     else:
         order_by_column = column_getter(order_by)
     query = query.order_by(order_by_column)
@@ -68,7 +68,7 @@ def _add_order_to_query(query: Select, order_by: str, column_getter) -> Select:
 
 
 def get_by_id(table: sa.Table, entity_id: int | UUID | str) -> Select:
-    return table.select().where(table.columns.id == entity_id)
+    return sa.select(table).where(table.columns.id == entity_id)
 
 
 def update(table: sa.Table, **kwargs) -> sa.Update:

@@ -1,3 +1,4 @@
+from pydantic import ConfigDict
 from sqlalchemy import String
 from sqlmodel import Field
 

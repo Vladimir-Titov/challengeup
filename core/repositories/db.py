@@ -1,13 +1,13 @@
 import abc
 from contextlib import asynccontextmanager
 import contextvars
-from typing import Any
+from typing import Any, Union
 
-from asyncpg import Pool, Connection
+from asyncpg import Pool, Connection  # type: ignore
 
 from core.repositories.query import compile_query
 
-db_ctx = contextvars.ContextVar('connection')
+db_ctx: contextvars.ContextVar[Union[Pool, Connection]] = contextvars.ContextVar('connection')
 
 
 class DBRepository:
