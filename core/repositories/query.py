@@ -20,6 +20,7 @@ def compile_query(query):
     return new_query, new_params
 
 
+
 def create(table: sa.Table, payload: dict) -> sa.Insert:
     return table.insert().values(payload).returning(table)
 

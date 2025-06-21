@@ -8,7 +8,7 @@ async def homepage(request):
     state = request.state
     db_pool = state.db_pool
     db_repos = DBRepositories.create(db_pool)
-    challenges = await db_repos.challenges.search()
+    challenges = await db_repos.challenges.search(title='test')
     return JSONResponse({'challenges': [challenge.model_dump() for challenge in challenges]})
 
 
