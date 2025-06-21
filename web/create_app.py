@@ -2,15 +2,18 @@ from starlette.applications import Starlette
 from starlette.middleware import Middleware
 from starlette.middleware.cors import CORSMiddleware
 
-from .initializers import some_init_job
+from web.api.lifespans.lifespan import app_lifespan
+
+from .api.lifespans.app_lifespans import app_lifespans
 from .routes import routes
+from settings.app import app_config
 
 
 class AppBuilder:
     routes = routes
-    lifespan = some_init_job
+    lifespan = app_lifespan(lifespans=app_lifespans.all)
     middlewares = [
-        Middleware(CORSMiddleware, allow_origins=['*'])  # todo: move to settings
+        Middleware(CORSMiddleware, **app_config.cors_settings)
     ]
 
     @classmethod
