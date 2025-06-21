@@ -12,8 +12,7 @@ def db_init(app_attribute_name: str, config: dict[str, Any]) -> Callable[[Starle
     async def _db(app: Starlette) -> AsyncIterator[None]:
         db_pool = await create_pool(config['dsn'])
         logger.debug('DB pool initialized')
-        setattr(app.state, app_attribute_name, db_pool)
-        yield
+        yield {app_attribute_name: db_pool}
         await db_pool.close()
         logger.debug('DB pool closed')
 
