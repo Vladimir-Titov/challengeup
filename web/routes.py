@@ -1,17 +1,13 @@
-from starlette.responses import JSONResponse
+import logging
 from starlette.routing import Route
 
-from app.repositories.repositories import DBRepositories
+from core.web.endpoint import BaseEndpoint
+
+logger = logging.getLogger(__name__)
 
 
-async def homepage(request):
-    state = request.state
-    db_pool = state.db_pool
-    db_repos = DBRepositories.create(db_pool)
-    challenges = await db_repos.challenges.search()
-    return JSONResponse({'challenges': [challenge.model_dump() for challenge in challenges]})
 
 
 routes = [
-    Route('/', homepage),
+    Route('/challenges/{id}', BaseEndpoint, methods=['GET']),
 ]

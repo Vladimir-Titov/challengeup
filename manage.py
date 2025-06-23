@@ -3,9 +3,9 @@ import logging
 import signal
 import uvicorn
 import uvloop
-import yaml  # type: ignore
 from typing import Optional
 
+from settings import app_config, logs_config
 from web.create_app import AppBuilder
 
 
@@ -16,12 +16,12 @@ def create_server():
     app = AppBuilder.create_app()
     config = uvicorn.Config(
         app,
-        port=5000,  # TODO: move to settings, all vars
-        log_level='debug',
-        reload=True,
-        loop='uvloop',
-        use_colors=True,
-        log_config='log_cfg.yaml',
+        port=app_config.port,
+        log_level=logs_config.log_level,
+        reload=app_config.debug,
+        loop=app_config.event_loop,
+        use_colors=logs_config.use_colors,
+        log_config=logs_config.log_config,
     )
     server = uvicorn.Server(config)
     return server
