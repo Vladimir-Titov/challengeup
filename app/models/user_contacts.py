@@ -1,9 +1,9 @@
 from enum import Enum
 import uuid
 from sqlalchemy import Index, String
-from sqlmodel import SQLModel, Field
+from sqlmodel import Field
 
-from .base import Base, challenges_schema
+from .base import BaseSQLModel, challenges_schema
 
 
 class ContactType(Enum):
@@ -13,7 +13,7 @@ class ContactType(Enum):
     TELEGRAM = 'telegram'
 
 
-class UserContacts(Base, table=True):
+class UserContacts(BaseSQLModel, table=True):
     __tablename__ = 'user_contacts'
     __table_args__ = (
         Index('user_contacts_contact_idx', 'contact', unique=False),

@@ -1,16 +1,15 @@
 from abc import abstractmethod
 from dataclasses import dataclass
-from http.client import HTTPException
 import logging
 from typing import Any, AsyncGenerator, Mapping
-from pydantic_core import PydanticSerializationError
+from pydantic_core import PydanticSerializationError, ValidationError as PydanticValidationError
 from sqlmodel import SQLModel
-from starlette.routing import Route
 from starlette.endpoints import HTTPEndpoint
-from starlette.responses import Response
+from starlette.responses import Response, JSONResponse
 from starlette.requests import Request
 
-from web.api.challenges import ChallengesAPI
+from core.starlette_ext.errors.errors import ValidationError
+
 
 logger = logging.getLogger(__name__)
 
@@ -23,29 +22,43 @@ class RequestParams:
     body: Mapping[str, Any] | list | None | AsyncGenerator | None = None
 
 
-def parse_params(data: dict[str, Any], schema: SQLModel) -> dict[str, Any]:
+def parse_params(data: dict[str, Any], schema: SQLModel | None = None) -> Any:
+    if schema is None:
+        return data
+
     try:
-        return schema.model_dump(data, warnings='error')
-    except PydanticSerializationError as e:
-        raise HTTPException(status_code=400, detail=str(e))
+        model = schema.model_validate(data)
+        return model.model_dump()
+    except (PydanticSerializationError, PydanticValidationError) as e:
+        raise ValidationError(message=str(e))
 
 
-class BaseEndpoint(HTTPEndpoint):
-    schema_response: SQLModel
-    schema_body: SQLModel
-    schema_query: SQLModel
-    schema_path: SQLModel
+class BaseSQLModelSQLModelEndpoint(HTTPEndpoint):
+    schema_response: SQLModel | None = None
+    schema_body: SQLModel | None = None
+    schema_query: SQLModel | None = None
+    schema_path: SQLModel | None = None
+
+    body_parser = None
 
     _media_type: str
     _response_media_type: str
 
-
     async def dispatch(self):
-        request = Request(self.scope, receive=self.receive)
-        request.path_params
+        try:
+            request = Request(self.scope, receive=self.receive)
+            path = parse_params(data=request.path_params, schema=self.schema_path)
+            query = parse_params(data=request.query_params, schema=self.schema_query)
+            # body = parse_params(await request.json(), self.schema_body)
+            # headers = parse_params(request.headers, self.schema_headers)
 
-        response = await self.execute(params=params)
-        return response
+            params = RequestParams(path=path, query=query)
+            response = await self.execute(params=params)
+            return await response(self.scope, self.receive, self.send)
+        except ValidationError as e:
+            logger.error(e)
+            response = JSONResponse(status_code=e.status_code, content=e.message)
+            return await response(self.scope, self.receive, self.send)
 
     @abstractmethod
     async def execute(self, params: RequestParams) -> Response:

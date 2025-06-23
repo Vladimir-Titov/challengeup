@@ -1,9 +1,8 @@
 class AppError(Exception):
-    status_code: 500
+    status_code: int = 500
     message: str = 'Internal Server Error'
 
-    def __init__(self, status_code: int, message: str, detail: str | None = None):
-        self.status_code = status_code
+    def __init__(self, message: str):
         self.message = message
 
     def __str__(self):
@@ -11,4 +10,4 @@ class AppError(Exception):
 
 
 class ValidationError(AppError):
-    status_code: 400
+    status_code: int = 400

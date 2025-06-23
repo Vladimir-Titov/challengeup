@@ -1,10 +1,10 @@
 from sqlalchemy import String
-from sqlmodel import SQLModel, Field
+from sqlmodel import Field
 
-from .base import Base, challenges_schema
+from .base import BaseSQLModel, challenges_schema
 
 
-class User(Base, table=True):
+class User(BaseSQLModel, table=True):
     metadata = challenges_schema
 
     first_name: str | None = Field(default=None, sa_type=String)

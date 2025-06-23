@@ -1,13 +1,8 @@
-import logging
 from starlette.routing import Route
 
-from core.web.endpoint import BaseEndpoint
-
-logger = logging.getLogger(__name__)
-
-
+from web.api.challenges import GetChallengeByID
 
 
 routes = [
-    Route('/challenges/{id}', BaseEndpoint, methods=['GET']),
+    Route('/challenges/{id}', GetChallengeByID, methods=['GET']),
 ]

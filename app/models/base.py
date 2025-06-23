@@ -10,7 +10,7 @@ false = text('false')
 challenges_schema = MetaData(schema='challenges')
 
 
-class Base(SQLModel):
+class BaseSQLModel(SQLModel):
     id: uuid.UUID = Field(primary_key=True, sa_column_kwargs={'server_default': generate_uuid})
     created: datetime.datetime = Field(sa_column_kwargs={'server_default': now_at_utc})
     updated: datetime.datetime = Field(sa_column_kwargs={'server_default': now_at_utc})
