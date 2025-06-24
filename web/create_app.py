@@ -12,13 +12,10 @@ from settings.app import app_config
 class AppBuilder:
     routes = routes
     lifespan = app_lifespan(lifespans=app_lifespans.all)
-    middlewares = [
-        Middleware(CORSMiddleware, **app_config.cors_settings)
-    ]
+    middlewares = [Middleware(CORSMiddleware, **app_config.cors_settings)]
 
     @classmethod
     def create_app(cls) -> Starlette:
-        
         app = Starlette(
             debug=app_config.debug,
             routes=cls.routes,

@@ -9,7 +9,7 @@ logger = logging.getLogger(__name__)
 
 
 class GetChallengeByID(BaseEndpoint):
-    schema_path = partial_apply(Challenges, only=['id'])
+    schema_query = Challenges
 
     async def execute(self, params: RequestParams) -> Response:
         logger.info(params)

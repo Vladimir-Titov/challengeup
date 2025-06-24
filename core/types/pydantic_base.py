@@ -13,7 +13,7 @@ class BaseUjsonModel(BaseModel):
     def serialize_custom_types(self) -> Dict[str, Any]:
         """Serialize custom types to json. Pydantic does not support json_encoders in v2."""
         serialized_fields = {}
-        for field in self.model_fields:
+        for field in self.__class__.model_fields:
             serialized_fields[field] = serialize_custom_types(getattr(self, field))
 
         return serialized_fields

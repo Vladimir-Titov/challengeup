@@ -9,4 +9,5 @@ def app_lifespan(lifespans: list):
         async with exit_stack:
             for lifespan in lifespans:
                 yield await exit_stack.enter_async_context(lifespan(app))
+
     return _lifespan_manager

@@ -8,4 +8,3 @@ class ChallengesService:
 
     async def get_challenges(self, **filters) -> list[Challenges]:
         return await self.db_repos.challenges.search(**filters)
-    
