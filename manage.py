@@ -1,13 +1,13 @@
 import asyncio
 import logging
 import signal
+from typing import Optional
+
 import uvicorn
 import uvloop
-from typing import Optional
 
 from settings import app_config, logs_config
 from web.create_app import AppBuilder
-
 
 logger = logging.getLogger(__name__)
 

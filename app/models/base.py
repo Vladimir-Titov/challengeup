@@ -1,7 +1,8 @@
 import datetime
 import uuid
-from sqlmodel import Field, SQLModel
+
 from sqlalchemy import MetaData, text
+from sqlmodel import Field, SQLModel
 
 now_at_utc = text("(now() at time zone 'utc')")
 generate_uuid = text('uuid_generate_v4()')

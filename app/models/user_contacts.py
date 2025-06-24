@@ -1,5 +1,6 @@
-from enum import Enum
 import uuid
+from enum import Enum
+
 from sqlalchemy import Index, String
 from sqlmodel import Field
 

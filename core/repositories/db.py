@@ -1,8 +1,8 @@
-from contextlib import asynccontextmanager
 import contextvars
-from typing import Any, Union
+from contextlib import asynccontextmanager
+from typing import Any, Mapping, Union
 
-from asyncpg import Pool, Connection  # type: ignore
+from asyncpg import Connection, Pool  # type: ignore
 
 from core.repositories.query import compile_query
 
@@ -77,7 +77,7 @@ class DBRepository:
             records = await con.fetch(compiled_query, *compiled_params)
             return [dict(record) for record in records]
 
-    async def fetchrow(self, query) -> dict | None:
+    async def fetchrow(self, query) -> Mapping[str, Any] | None:
         """
         Execute a query and return a single row as a dictionary.
 

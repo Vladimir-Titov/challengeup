@@ -3,7 +3,7 @@ from enum import Enum
 from typing import Any, Dict
 from uuid import UUID
 
-from pydantic import BaseModel, model_serializer, ConfigDict
+from pydantic import BaseModel, ConfigDict, model_serializer
 
 
 class BaseUjsonModel(BaseModel):

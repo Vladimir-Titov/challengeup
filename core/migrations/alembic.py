@@ -1,8 +1,8 @@
 from logging.config import fileConfig
-from sqlalchemy import MetaData, Sequence, engine_from_config
-from alembic import context
-from sqlalchemy import pool
 
+from sqlalchemy import MetaData, Sequence, engine_from_config, pool
+
+from alembic import context
 from alembic.script import ScriptDirectory
 
 config = context.config

@@ -1,5 +1,5 @@
-from web.lifespans.db import db_init
 from settings.db import db_config
+from web.lifespans.db import db_init
 
 
 class AppLifespans:

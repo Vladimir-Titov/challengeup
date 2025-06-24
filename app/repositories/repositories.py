@@ -1,5 +1,6 @@
 from asyncpg import Pool  # type: ignore
-from app.models import Challenges, UserContacts, User
+
+from app.models import Challenges, User, UserContacts
 from core.repositories.entity_db import EntityDBRepository
 
 
