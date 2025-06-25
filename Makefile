@@ -20,6 +20,7 @@ format:
 fix:
 	@ruff check . --fix
 	@ruff format .
+	@isort .
 
 check:
 	@mypy .

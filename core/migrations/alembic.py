@@ -1,6 +1,6 @@
 from logging.config import fileConfig
 
-from sqlalchemy import MetaData, Sequence, engine_from_config, pool
+from sqlalchemy import MetaData, engine_from_config, pool
 
 from alembic import context
 from alembic.script import ScriptDirectory

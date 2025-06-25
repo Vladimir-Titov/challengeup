@@ -12,6 +12,7 @@ class AppError(Exception):
     def code(cls) -> str:
         return ''.join(['_' + i.lower() if i.isupper() else i for i in cls.__name__]).lstrip('_')
 
+
 class ValidationError(AppError):
     status_code: int = 400
 

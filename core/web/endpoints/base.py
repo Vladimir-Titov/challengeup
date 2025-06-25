@@ -7,12 +7,10 @@ from pydantic import BaseModel
 from pydantic_core import PydanticSerializationError
 from pydantic_core import ValidationError as PydanticValidationError
 from starlette.endpoints import HTTPEndpoint
-from starlette.exceptions import HTTPException
 from starlette.requests import Request
 from starlette.responses import JSONResponse, Response
 
-from core.starlette_ext.errors.errors import (AppError, MethodNotAllowedError,
-                                              ValidationError)
+from core.starlette_ext.errors.errors import AppError, ValidationError
 from core.web.endpoints.parsers.base import BodyParser
 
 logger = logging.getLogger(__name__)
@@ -33,8 +31,10 @@ def parse_params(data: Any, schema: type[BaseModel] | None = None) -> Any:
     try:
         model = schema.model_validate(data)
         return model.model_dump()
-    except (PydanticSerializationError, PydanticValidationError) as e:
+    except PydanticValidationError as e:
         raise ValidationError(message=e.json())
+    except PydanticSerializationError as e:
+        raise ValidationError(message=getattr(e, 'message', 'Unknown error'))
 
 
 class BaseEndpoint(HTTPEndpoint):
@@ -50,7 +50,7 @@ class BaseEndpoint(HTTPEndpoint):
     _response_media_type: str
 
     @abstractmethod
-    async def get_response(self, data: Any, status_code: int = 200, headers: dict[str, str] | None = None) -> Response:
+    async def get_response(self, data: Any, status_code: int = 200, headers: dict[str, str] | None = None) -> Any:
         """Method to get response from endpoint"""
 
     async def _get_request(self, request: Request) -> RequestParams:
@@ -97,7 +97,7 @@ class BaseEndpoint(HTTPEndpoint):
             logger.error(f'Internal server error: {err}')
             return await response(self.scope, self.receive, self.send)
 
-    async def dispatch(self) -> None:
+    async def dispatch(self) -> Any:
         try:
             request = Request(self.scope, receive=self.receive)
             return await self._dispatch(request=request)

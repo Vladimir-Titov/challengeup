@@ -1,7 +1,6 @@
-from typing import Any, Sequence, cast
+from typing import Sequence
 
 from pydantic import BaseModel, create_model
-from sqlmodel import SQLModel
 
 
 def partial_apply(
@@ -19,7 +18,8 @@ def partial_apply(
 
     return create_model(  # type: ignore
         model_name,
-        __config__=model.model_config,        **{
+        __config__=model.model_config,
+        **{
             field_name: (field_info.annotation, field_info.default)
             for field_name, field_info in model.model_fields.items()
             if (exclude is None or field_name not in exclude) and (only is None or field_name in only)
