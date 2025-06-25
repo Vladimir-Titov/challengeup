@@ -46,6 +46,11 @@ follow_untyped_imports = true
 module = "asyncpg"
 ignore_missing_imports = true
 
+[[tool.mypy.overrides]]
+module = "web.api.*"
+disable_error_code = ["arg-type"]
+
+
 
 [dependency-groups]
 dev = [

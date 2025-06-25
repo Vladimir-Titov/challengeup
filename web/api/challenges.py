@@ -1,16 +1,24 @@
 import logging
 from typing import Any
 
-from app.models.challenges import Challenges
-from core.utils.types import partial_apply
+from pydantic import BaseModel
+from starlette.datastructures import State
+
+from app.repositories.repositories import DBRepositories
 from core.web.endpoints.base import RequestParams
 from core.web.endpoints.json import JSONEndpoint
 
 logger = logging.getLogger(__name__)
 
+class GetChallengesQuery(BaseModel):
+    title: str | None = None
 
-class GetChallengeByID(JSONEndpoint):
-    schema_query = partial_apply(Challenges, only=['title'])
 
-    async def get(self, params: RequestParams) -> Any:
-        return {'message': 'Hello, World!'}
+class GetChallenges(JSONEndpoint):
+    schema_query = GetChallengesQuery
+
+    async def get(self, params: RequestParams, state: State) -> Any:
+        db = state.db_pool
+        dao = DBRepositories.create(db_pool=db)
+        challenges = await dao.challenges.search(**params.query)
+        return challenges

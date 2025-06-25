@@ -6,9 +6,10 @@ from typing import Any, AsyncGenerator, Callable, Mapping
 from pydantic import BaseModel
 from pydantic_core import PydanticSerializationError
 from pydantic_core import ValidationError as PydanticValidationError
+from starlette.datastructures import State
 from starlette.endpoints import HTTPEndpoint
 from starlette.requests import Request
-from starlette.responses import JSONResponse, Response
+from starlette.responses import JSONResponse
 
 from core.starlette_ext.errors.errors import AppError, ValidationError
 from core.web.endpoints.parsers.base import BodyParser
@@ -21,7 +22,7 @@ class RequestParams:
     path: Mapping[str, Any] | None = None
     headers: Mapping[str, Any] | None = None
     query: Mapping[str, Any] | None = None
-    body: Mapping[str, Any] | list | None | AsyncGenerator | None = None
+    body: Mapping[str, Any] | list | None | AsyncGenerator = None
 
 
 def parse_params(data: Any, schema: type[BaseModel] | None = None) -> Any:
@@ -30,7 +31,7 @@ def parse_params(data: Any, schema: type[BaseModel] | None = None) -> Any:
 
     try:
         model = schema.model_validate(data)
-        return model.model_dump()
+        return model.model_dump(exclude_none=True)
     except PydanticValidationError as e:
         raise ValidationError(message=e.json())
     except PydanticSerializationError as e:
@@ -65,12 +66,12 @@ class BaseEndpoint(HTTPEndpoint):
         params = await self._get_request(request=request)
         handler_name = 'get' if request.method == 'HEAD' and not hasattr(self, 'head') else request.method.lower()
 
-        handler: Callable[[RequestParams], Any] | None = getattr(self, handler_name, None)
+        handler: Callable[[RequestParams, State], Any] | None = getattr(self, handler_name, None)
 
         if handler is None:
-            raise AppError(message='Internal Server Error')
+            raise AppError(message=f'Handler for method={handler_name} not found')
 
-        response_data = await handler(params)
+        response_data = await handler(params, request.state)
         response = await self.get_response(data=response_data)
 
         return await response(self.scope, self.receive, self.send)
@@ -83,6 +84,9 @@ class BaseEndpoint(HTTPEndpoint):
                     'code': err.code(),
                     'message': err.message,
                 },
+                headers={
+                    'Content-Type': 'application/json',
+                },
             )
             return await response(self.scope, self.receive, self.send)
         else:
@@ -92,8 +96,10 @@ class BaseEndpoint(HTTPEndpoint):
                     'code': 'internal_server_error',
                     'message': 'Internal Server Error',
                 },
+                headers={
+                    'Content-Type': 'application/json',
+                },
             )
-            raise err
             logger.error(f'Internal server error: {err}')
             return await response(self.scope, self.receive, self.send)
 
