@@ -64,14 +64,8 @@ class BaseEndpoint(HTTPEndpoint):
     async def _dispatch(self, request: Request):
         request = Request(self.scope, receive=self.receive)
         params = await self._get_request(request=request)
-        handler_name = 'get' if request.method == 'HEAD' and not hasattr(self, 'head') else request.method.lower()
 
-        handler: Callable[[RequestParams, State], Any] | None = getattr(self, handler_name, None)
-
-        if handler is None:
-            raise AppError(message=f'Handler for method={handler_name} not found')
-
-        response_data = await handler(params, request.state)
+        response_data = await self.execute(params=params, state=request.state)
         response = await self.get_response(data=response_data)
 
         return await response(self.scope, self.receive, self.send)
@@ -109,3 +103,7 @@ class BaseEndpoint(HTTPEndpoint):
             return await self._dispatch(request=request)
         except Exception as err:
             return await self._handle_exceptions(err=err)
+
+    @abstractmethod
+    async def execute(self, params: RequestParams, state: State) -> Any:
+        """Method to execute endpoint"""

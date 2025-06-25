@@ -17,7 +17,7 @@ class GetChallengesQuery(BaseModel):
 class GetChallenges(JSONEndpoint):
     schema_query = GetChallengesQuery
 
-    async def get(self, params: RequestParams, state: State) -> Any:
+    async def execute(self, params: RequestParams, state: State) -> Any:
         db = state.db_pool
         dao = DBRepositories.create(db_pool=db)
         challenges = await dao.challenges.search(**params.query)
