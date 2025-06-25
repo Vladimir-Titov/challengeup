@@ -3,11 +3,11 @@ from typing import Any
 from starlette.responses import JSONResponse, Response
 
 from core.web.endpoints.base import BaseEndpoint
-from core.web.endpoints.parsers.json import JSONParser
+from core.web.endpoints.parsers.json import JSONBodyParser
 
 
 class JSONEndpoint(BaseEndpoint):
-    body_parser = JSONParser()
+    body_parser = JSONBodyParser()
 
     _media_type: str = 'application/json'
     _response_media_type: str = 'application/json'

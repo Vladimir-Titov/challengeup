@@ -6,11 +6,14 @@ from starlette.responses import JSONResponse, Response
 from app.models.challenges import Challenges
 from core.utils.types import partial_apply
 from core.web.endpoints.base import BaseEndpoint, RequestParams
+from core.web.endpoints.json import JSONEndpoint
+from core.web.endpoints.parsers.base import BodyParser
+from core.web.endpoints.parsers.json import JSONBodyParser
 
 logger = logging.getLogger(__name__)
 
 
-class GetChallengeByID(BaseEndpoint):
+class GetChallengeByID(JSONEndpoint):
     schema_query = partial_apply(Challenges, only=['title'])
 
     async def get(self, params: RequestParams) -> Response:
