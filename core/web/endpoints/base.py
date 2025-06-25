@@ -11,7 +11,8 @@ from starlette.exceptions import HTTPException
 from starlette.requests import Request
 from starlette.responses import JSONResponse, Response
 
-from core.starlette_ext.errors.errors import AppError, MethodNotAllowedError, ValidationError
+from core.starlette_ext.errors.errors import (AppError, MethodNotAllowedError,
+                                              ValidationError)
 from core.web.endpoints.parsers.base import BodyParser
 
 logger = logging.getLogger(__name__)

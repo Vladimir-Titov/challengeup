@@ -1,12 +1,13 @@
 from typing import Any, Type, Union
 from uuid import UUID
 
-from sqlalchemy import ColumnElement, Pool, Select, Table, column, Update
+from sqlalchemy import ColumnElement, Pool, Select, Table, Update, column
 from sqlmodel import SQLModel
 
 from core.repositories.db import DBRepository
 from core.repositories.errors import RowNotFoundError
-from core.repositories.query import count, create, get_by_id, search, update, update_by_id
+from core.repositories.query import (count, create, get_by_id, search, update,
+                                     update_by_id)
 
 
 class EntityDBRepository[Entity: SQLModel](DBRepository):
