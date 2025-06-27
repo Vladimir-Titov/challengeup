@@ -31,7 +31,7 @@ def parse_params(data: Any, schema: type[BaseModel] | None = None) -> Any:
 
     try:
         model = schema.model_validate(data)
-        return model.model_dump(exclude_none=True)
+        return model.model_dump()
     except PydanticValidationError as e:
         raise ValidationError(message=e.json())
     except PydanticSerializationError as e:
@@ -50,6 +50,15 @@ class BaseEndpoint(HTTPEndpoint):
     _media_type: str
     _response_media_type: str
 
+    @property
+    def request(self) -> Request:
+        return Request(self.scope, receive=self.receive)
+
+    @property
+    def state(self) -> State:
+        request = Request(self.scope, receive=self.receive)
+        return request.state
+
     @abstractmethod
     async def get_response(self, data: Any, status_code: int = 200, headers: dict[str, str] | None = None) -> Any:
         """Method to get response from endpoint"""
@@ -65,7 +74,7 @@ class BaseEndpoint(HTTPEndpoint):
         request = Request(self.scope, receive=self.receive)
         params = await self._get_request(request=request)
 
-        response_data = await self.execute(params=params, state=request.state)
+        response_data = await self.execute(params=params)
         response = await self.get_response(data=response_data)
 
         return await response(self.scope, self.receive, self.send)
@@ -105,5 +114,5 @@ class BaseEndpoint(HTTPEndpoint):
             return await self._handle_exceptions(err=err)
 
     @abstractmethod
-    async def execute(self, params: RequestParams, state: State) -> Any:
+    async def execute(self, params: RequestParams) -> Any:
         """Method to execute endpoint"""
