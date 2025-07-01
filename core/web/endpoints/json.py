@@ -1,4 +1,4 @@
-from typing import Any
+from typing import Any, get_origin, get_args
 
 from pydantic import BaseModel
 from starlette.responses import JSONResponse, Response
@@ -19,7 +19,12 @@ class JSONEndpoint(BaseEndpoint):
                 data = [item.model_dump(mode='json') for item in data]
         if isinstance(data, BaseModel):
             data = data.model_dump(mode='json')
-        response = self.schema_response.model_validate(data).model_dump(mode='json') if self.schema_response else data
+        if get_origin(self.schema_response) is list:
+            inner_type = get_args(self.schema_response)[0]
+            response = [inner_type.model_validate(item).model_dump(mode='json') for item in data]
+        else:
+            response = self.schema_response.model_validate(data).model_dump(mode='json') if self.schema_response else data
+
         return JSONResponse(
             content=response,
             status_code=status_code,

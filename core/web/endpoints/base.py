@@ -1,7 +1,7 @@
 import logging
 from abc import abstractmethod
 from dataclasses import dataclass
-from typing import Any, AsyncGenerator, Callable, Mapping
+from typing import Any, AsyncGenerator, Mapping
 
 from pydantic import BaseModel
 from pydantic_core import PydanticSerializationError
@@ -31,7 +31,7 @@ def parse_params(data: Any, schema: type[BaseModel] | None = None) -> Any:
 
     try:
         model = schema.model_validate(data)
-        return model.model_dump()
+        return model.model_dump(exclude_none=True)
     except PydanticValidationError as e:
         raise ValidationError(message=e.json())
     except PydanticSerializationError as e:

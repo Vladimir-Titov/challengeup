@@ -37,12 +37,16 @@ def search(
     offset: int = 0,
     base_query: Select | None = None,
 ) -> Select:
+    logger.debug(f"search called with base_query: {base_query}")
     if base_query is None:
         query: Select = sa.select(table)
-        column_getter: Callable[[str], Any] = query.columns.__getitem__
+        column_getter: Callable[[str], Any] = table.columns.__getitem__
+        logger.debug("Using table.columns.__getitem__ for column_getter")
     else:
         query = base_query.select()
-        column_getter = sa.column
+        # When using base_query, we need to use sa.column to reference columns in the subquery context
+        column_getter = lambda col_name: sa.column(col_name)
+        logger.debug("Using sa.column for column_getter")
 
     if order_by:
         if isinstance(order_by, list):
@@ -72,7 +76,7 @@ def get_by_id(table: sa.Table, entity_id: int | UUID | str) -> Select:
 
 
 def update(table: sa.Table, **kwargs) -> sa.Update:
-    return table.update().values(updated=datetime.datetime.now(datetime.UTC), **kwargs).returning(table)
+    return table.update().values(updated=datetime.datetime.utcnow(), **kwargs).returning(table)
 
 
 def update_by_id(table: sa.Table, entity_id: int | UUID | str, **kwargs) -> sa.Update:

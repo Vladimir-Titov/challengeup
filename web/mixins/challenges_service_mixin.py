@@ -1,4 +1,3 @@
-
 from app.repositories.repositories import DBRepositories
 from app.services.challenges_service import ChallengesService
 from core.web.endpoints.base import BaseEndpoint

@@ -16,4 +16,4 @@ class JSONBodyParser(BodyParser):
         if schema is None:
             return data
 
-        return schema.model_validate(data)
+        return schema.model_validate(data).model_dump(exclude_none=True)

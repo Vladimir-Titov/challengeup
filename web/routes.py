@@ -1,7 +1,9 @@
 from starlette.routing import Route
 
-from web.api.challenges import GetChallenges
+from web.api import challenges
 
 routes = [
-    Route('/challenges', GetChallenges, methods=['GET']),
+    Route('/challenges', challenges.GetChallenges, methods=['GET']),
+    Route('/challenges', challenges.CreateChallenge, methods=['POST']),
+    Route('/challenges/{id}', challenges.UpdateChallengeByID, methods=['PATCH']),
 ]
