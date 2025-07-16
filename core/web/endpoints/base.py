@@ -18,6 +18,15 @@ logger = logging.getLogger(__name__)
 
 
 @dataclass
+class EndpointMeta:
+    name: str | None = None
+    description: str | None = None
+    summary: str | None = None
+    tag: str | None = None
+    operation_id: str | None = None
+
+
+@dataclass
 class RequestParams:
     path: Mapping[str, Any] | None = None
     headers: Mapping[str, Any] | None = None
@@ -39,6 +48,8 @@ def parse_params(data: Any, schema: type[BaseModel] | None = None) -> Any:
 
 
 class BaseEndpoint(HTTPEndpoint):
+    meta: EndpointMeta = EndpointMeta()
+
     schema_response: type[BaseModel] | None = None
     schema_body: type[BaseModel] | None = None
     schema_query: type[BaseModel] | None = None

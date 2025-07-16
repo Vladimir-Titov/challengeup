@@ -20,3 +20,7 @@ class ValidationError(AppError):
 class MethodNotAllowedError(AppError):
     status_code: int = 405
     message: str = 'Method Not Allowed'
+
+
+class NotFoundError(AppError):
+    status_code: int = 404

@@ -23,7 +23,9 @@ class JSONEndpoint(BaseEndpoint):
             inner_type = get_args(self.schema_response)[0]
             response = [inner_type.model_validate(item).model_dump(mode='json') for item in data]
         else:
-            response = self.schema_response.model_validate(data).model_dump(mode='json') if self.schema_response else data
+            response = (
+                self.schema_response.model_validate(data).model_dump(mode='json') if self.schema_response else data
+            )
 
         return JSONResponse(
             content=response,

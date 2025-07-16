@@ -13,6 +13,9 @@ class ContactType(Enum):
     WHATSAPP = 'whatsapp'
     TELEGRAM = 'telegram'
 
+    def __str__(self) -> str:
+        return self.value
+
 
 class UserContacts(BaseSQLModel, table=True):
     __tablename__ = 'user_contacts'
@@ -26,3 +29,9 @@ class UserContacts(BaseSQLModel, table=True):
     user_id: uuid.UUID = Field(foreign_key='user.id')
     contact_type: ContactType = Field(sa_type=String)
     contact: str = Field(sa_type=String)
+
+    def dict(self, *args, **kwargs):
+        data = super().dict(*args, **kwargs)
+        if 'contact_type' in data and isinstance(data['contact_type'], ContactType):
+            data['contact_type'] = str(data['contact_type'])
+        return data
