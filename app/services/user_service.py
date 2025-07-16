@@ -27,8 +27,8 @@ class UserService:
         except RowNotFoundError:
             raise NotFoundError(f'User with id {user_id} not found')
 
-    async def delete_user_by_id(self, user_id: UUID) -> None:
+    async def delete_user_by_id(self, user_id: UUID) -> User:
         try:
-            await self.db_repos.user.archive_by_id(entity_id=user_id)
+            return await self.db_repos.user.archive_by_id(entity_id=user_id)
         except RowNotFoundError:
             raise NotFoundError(f'User with id {user_id} not found')

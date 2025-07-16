@@ -27,9 +27,9 @@ class UserContactsService:
         except RowNotFoundError:
             raise NotFoundError(f'User contact with id {contact_id} not found')
 
-    async def delete_user_contact_by_id(self, contact_id: UUID) -> None:
+    async def delete_user_contact_by_id(self, contact_id: UUID) -> UserContacts:
         try:
-            await self.db_repos.user_contacts.archive_by_id(entity_id=contact_id)
+            return await self.db_repos.user_contacts.archive_by_id(entity_id=contact_id)
         except RowNotFoundError:
             raise NotFoundError(f'User contact with id {contact_id} not found')
 

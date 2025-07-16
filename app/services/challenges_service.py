@@ -27,8 +27,8 @@ class ChallengesService:
         except RowNotFoundError:
             raise NotFoundError(f'Challenge with id {challenge_id} not found')
 
-    async def delete_challenge_by_id(self, challenge_id: UUID) -> None:
+    async def delete_challenge_by_id(self, challenge_id: UUID) -> Challenges:
         try:
-            await self.db_repos.challenges.archive_by_id(entity_id=challenge_id)
+            return await self.db_repos.challenges.archive_by_id(entity_id=challenge_id)
         except RowNotFoundError:
             raise NotFoundError(f'Challenge with id {challenge_id} not found')

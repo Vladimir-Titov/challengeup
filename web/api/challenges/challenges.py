@@ -60,7 +60,8 @@ class DeleteChallengeByID(JSONEndpoint, ChallengesServiceMixin):
     meta = meta(summary='Delete challenge by id')
 
     schema_path = GetByID
+    schema_response = Challenges
 
     async def execute(self, params: RequestParams) -> Any:
-        await self.challenges_service.delete_challenge_by_id(challenge_id=params.path['id'])
-        return {'message': 'Challenge deleted successfully'}
+        return await self.challenges_service.delete_challenge_by_id(challenge_id=params.path['id'])
+        

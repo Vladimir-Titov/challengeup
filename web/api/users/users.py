@@ -60,7 +60,7 @@ class DeleteUserByID(JSONEndpoint, UserServiceMixin):
     meta = meta(summary='Delete user by id')
 
     schema_path = GetByID
+    schema_response = User
 
     async def execute(self, params: RequestParams) -> Any:
-        await self.user_service.delete_user_by_id(user_id=params.path['id'])
-        return {'message': 'User deleted successfully'}
+        return await self.user_service.delete_user_by_id(user_id=params.path['id'])

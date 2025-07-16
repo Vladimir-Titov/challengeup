@@ -58,12 +58,11 @@ class GetUserContactByID(JSONEndpoint, UserContactsServiceMixin):
 
 class DeleteUserContactByID(JSONEndpoint, UserContactsServiceMixin):
     meta = meta(summary='Delete user contact by id')
-
     schema_path = GetByID
+    schema_response = UserContacts
 
     async def execute(self, params: RequestParams) -> Any:
-        await self.user_contacts_service.delete_user_contact_by_id(contact_id=params.path['id'])
-        return {'message': 'User contact deleted successfully'}
+        return await self.user_contacts_service.delete_user_contact_by_id(contact_id=params.path['id'])
 
 
 class GetContactsByUserID(JSONEndpoint, UserContactsServiceMixin):
