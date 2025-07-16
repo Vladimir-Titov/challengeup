@@ -1,7 +1,10 @@
 from typing import Dict, Any, List
-from starlette.routing import Route
-from starlette.responses import JSONResponse
+import os
+from starlette.routing import Route, Mount
+from starlette.responses import JSONResponse, HTMLResponse
 from starlette.requests import Request
+from starlette.staticfiles import StaticFiles
+import swagger_ui_bundle
 
 from .generator import EndpointSchemaGenerator
 
@@ -10,10 +13,23 @@ async def get_openapi_schema(request: Request, schema_generator: EndpointSchemaG
     return JSONResponse(content=schema_generator.get_schema(routes))
 
 
+async def swagger_ui(request: Request) -> HTMLResponse:
+    """Отдает HTML страницу с Swagger UI"""
+    current_dir = os.path.dirname(os.path.abspath(__file__))
+    html_path = os.path.join(current_dir, 'swagger_ui.html')
+    
+    with open(html_path, 'r', encoding='utf-8') as f:
+        html_content = f.read()
+    
+    return HTMLResponse(content=html_content)
+
+
 def setup_openapi(
     routes: List[Route],
     info: Dict[str, Any] = None,
     openapi_url: str = '/openapi.json',
+    docs_url: str = '/docs',
+    swagger_static_url: str = '/swagger-static'
 ) -> List[Route]:
     """
     Настраивает OpenAPI для приложения и возвращает дополнительные маршруты
@@ -22,6 +38,8 @@ def setup_openapi(
         routes: Список существующих маршрутов
         info: Информация об API для OpenAPI схемы
         openapi_url: URL для получения OpenAPI схемы
+        docs_url: URL для Swagger UI документации
+        swagger_static_url: URL для статических файлов Swagger UI
 
     Returns:
         Список дополнительных маршрутов для OpenAPI
@@ -35,9 +53,14 @@ def setup_openapi(
     async def openapi_endpoint(request: Request):
         return await get_openapi_schema(request, schema_generator, routes)
 
+    # Получаем путь к статическим файлам swagger-ui-bundle
+    swagger_static_dir = swagger_ui_bundle.swagger_ui_path
+
     # Возвращаем дополнительные маршруты
     openapi_routes = [
         Route(openapi_url, endpoint=openapi_endpoint, methods=['GET'], include_in_schema=False),
+        Route(docs_url, endpoint=swagger_ui, methods=['GET'], include_in_schema=False),
+        Mount(swagger_static_url, app=StaticFiles(directory=swagger_static_dir), name="swagger_static")
     ]
 
     return openapi_routes
