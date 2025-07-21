@@ -16,7 +16,7 @@ meta = partial(EndpointMeta, tag='users')
 
 
 class GetUsers(JSONEndpoint, UserServiceMixin):
-    meta = meta
+    meta = meta()
 
     schema_query = schemas.GetUsersQuery
     schema_response = list[User]
