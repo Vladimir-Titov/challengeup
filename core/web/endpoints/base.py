@@ -28,10 +28,10 @@ class EndpointMeta:
 
 @dataclass
 class RequestParams:
-    path: Mapping[str, Any] = None
-    headers: Mapping[str, Any] = None
-    query: Mapping[str, Any]  = None
-    body: Mapping[str, Any] | list | AsyncGenerator = None
+    path: Mapping[str, Any] = dict()
+    headers: Mapping[str, Any] = dict()
+    query: Mapping[str, Any] = dict()
+    body: Mapping[str, Any] | list[Any] | AsyncGenerator[Any, None] = dict()
 
 
 def parse_params(data: Any, schema: type[BaseModel] | None = None) -> Any:

@@ -1,6 +1,6 @@
 import inspect
 import logging
-from typing import Any, Dict, List, Optional, Type, get_origin, get_args, Union, Collection
+from typing import Any, Dict, List, Optional, Type, get_origin, get_args, Union
 
 from pydantic import BaseModel
 from starlette.routing import BaseRoute, Route, Mount
@@ -19,7 +19,7 @@ class EndpointSchemaGenerator(BaseSchemaGenerator):
 
     def get_schema(self, routes: List[BaseRoute]) -> Dict[str, Any]:
         """Генерирует OpenAPI схему из маршрутов"""
-        openapi_schema = {
+        openapi_schema: Dict[str, Any] = {
             'openapi': '3.0.3',
             'info': self.info,
             'paths': {},
@@ -377,49 +377,49 @@ class EndpointSchemaGenerator(BaseSchemaGenerator):
         return {'$ref': f'#/components/schemas/{schema_name}'}
 
     def _fix_schema_for_openapi(self, schema: Dict[str, Any]) -> Dict[str, Any]:
-        if isinstance(schema, dict):
-            fixed_schema = schema.copy()
-            
-            if 'enum' in fixed_schema and 'type' not in fixed_schema:
-                fixed_schema['type'] = 'string'
-            
-            if 'anyOf' in fixed_schema:
-                any_of = fixed_schema['anyOf']
-                if len(any_of) == 2:
-                    null_item = None
-                    other_item = None
-                    
-                    for item in any_of:
-                        if isinstance(item, dict):
-                            if item.get('type') == 'null':
-                                null_item = item
-                            else:
-                                other_item = item
-                    
-                    if null_item and other_item:
-                        del fixed_schema['anyOf']
-                        fixed_schema.update(other_item)
-                        fixed_schema['nullable'] = True
-            
-            if '$ref' in fixed_schema:
-                ref_value = fixed_schema['$ref']
-                if '#/$defs/' in ref_value:
-                    ref_name = ref_value.split('#/$defs/')[-1]
-                    fixed_schema['$ref'] = f'#/components/schemas/{ref_name}'
-            
-            if 'properties' in fixed_schema:
-                fixed_properties = {}
-                for prop_name, prop_schema in fixed_schema['properties'].items():
-                    fixed_properties[prop_name] = self._fix_schema_for_openapi(prop_schema)
-                fixed_schema['properties'] = fixed_properties
-            
-            if 'items' in fixed_schema:
-                fixed_schema['items'] = self._fix_schema_for_openapi(fixed_schema['items'])
-            
-            if 'additionalProperties' in fixed_schema and isinstance(fixed_schema['additionalProperties'], dict):
-                fixed_schema['additionalProperties'] = self._fix_schema_for_openapi(fixed_schema['additionalProperties'])
-            
-            return fixed_schema
+        if not isinstance(schema, dict):
+            return schema
+
+        fixed_schema: Dict[str, Any] = schema.copy()  # type: ignore
         
-        return schema
+        if 'enum' in fixed_schema and 'type' not in fixed_schema:
+            fixed_schema['type'] = 'string'
+        
+        if 'anyOf' in fixed_schema:
+            any_of = fixed_schema['anyOf']
+            if len(any_of) == 2:
+                null_item = None
+                other_item = None
+                
+                for item in any_of:
+                    if isinstance(item, dict):
+                        if item.get('type') == 'null':
+                            null_item = item
+                        else:
+                            other_item = item
+                
+                if null_item and other_item:
+                    del fixed_schema['anyOf']
+                    fixed_schema.update(other_item)  # type: ignore
+                    fixed_schema['nullable'] = True
+        
+        if '$ref' in fixed_schema:
+            ref_value = fixed_schema['$ref']
+            if '#/$defs/' in ref_value:
+                ref_name = ref_value.split('#/$defs/')[-1]
+                fixed_schema['$ref'] = f'#/components/schemas/{ref_name}'  # type: ignore
+        
+        if 'properties' in fixed_schema:
+            fixed_properties = {}
+            for prop_name, prop_schema in fixed_schema['properties'].items():  # type: ignore
+                fixed_properties[prop_name] = self._fix_schema_for_openapi(prop_schema)
+            fixed_schema['properties'] = fixed_properties
+        
+        if 'items' in fixed_schema:
+            fixed_schema['items'] = self._fix_schema_for_openapi(fixed_schema['items'])  # type: ignore
+        
+        if 'additionalProperties' in fixed_schema and isinstance(fixed_schema['additionalProperties'], dict):
+            fixed_schema['additionalProperties'] = self._fix_schema_for_openapi(fixed_schema['additionalProperties'])  # type: ignore
+        
+        return fixed_schema
 

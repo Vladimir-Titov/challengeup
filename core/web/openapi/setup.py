@@ -1,4 +1,4 @@
-from typing import Dict, Any, List, Optional
+from typing import Dict, Any, List, Optional, Sequence
 import os
 from starlette.routing import Route, Mount, BaseRoute
 from starlette.responses import JSONResponse, HTMLResponse
@@ -9,8 +9,8 @@ import swagger_ui_bundle
 from .generator import EndpointSchemaGenerator
 
 
-async def get_openapi_schema(request: Request, schema_generator: EndpointSchemaGenerator, routes: List[Route]):
-    return JSONResponse(content=schema_generator.get_schema(routes))
+async def get_openapi_schema(request: Request, schema_generator: EndpointSchemaGenerator, routes: Sequence[BaseRoute]):
+    return JSONResponse(content=schema_generator.get_schema(list(routes)))
 
 
 async def swagger_ui(request: Request) -> HTMLResponse:
@@ -25,7 +25,7 @@ async def swagger_ui(request: Request) -> HTMLResponse:
 
 
 def setup_openapi(
-    routes: List[Route],
+    routes: Sequence[BaseRoute],
     info: Optional[Dict[str, Any]] = None,
     openapi_url: str = '/openapi.json',
     docs_url: str = '/docs',
