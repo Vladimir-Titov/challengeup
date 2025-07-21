@@ -1,6 +1,6 @@
-from typing import Dict, Any, List
+from typing import Dict, Any, List, Optional
 import os
-from starlette.routing import Route, Mount
+from starlette.routing import Route, Mount, BaseRoute
 from starlette.responses import JSONResponse, HTMLResponse
 from starlette.requests import Request
 from starlette.staticfiles import StaticFiles
@@ -26,11 +26,11 @@ async def swagger_ui(request: Request) -> HTMLResponse:
 
 def setup_openapi(
     routes: List[Route],
-    info: Dict[str, Any] = None,
+    info: Optional[Dict[str, Any]] = None,
     openapi_url: str = '/openapi.json',
     docs_url: str = '/docs',
     swagger_static_url: str = '/swagger-static'
-) -> List[Route]:
+) -> List[BaseRoute]:
     """
     Настраивает OpenAPI для приложения и возвращает дополнительные маршруты
 

@@ -1,9 +1,9 @@
 import inspect
 import logging
-from typing import Any, Dict, List, Optional, Type, get_origin, get_args, Union
+from typing import Any, Dict, List, Optional, Type, get_origin, get_args, Union, Collection
 
 from pydantic import BaseModel
-from starlette.routing import Route, Mount
+from starlette.routing import BaseRoute, Route, Mount
 from starlette.schemas import BaseSchemaGenerator
 
 from core.web.endpoints.base import BaseEndpoint, EndpointMeta
@@ -15,8 +15,9 @@ class EndpointSchemaGenerator(BaseSchemaGenerator):
 
     def __init__(self, info: Dict[str, Any]):
         self.info = info
+        self.components: Dict[str, Dict[str, Any]] = {}
 
-    def get_schema(self, routes: List[Route]) -> Dict[str, Any]:
+    def get_schema(self, routes: List[BaseRoute]) -> Dict[str, Any]:
         """Генерирует OpenAPI схему из маршрутов"""
         openapi_schema = {
             'openapi': '3.0.3',
@@ -27,7 +28,7 @@ class EndpointSchemaGenerator(BaseSchemaGenerator):
             }
         }
 
-        components = {}
+        components: Dict[str, Dict[str, Any]] = {}
 
         for route in routes:
             if isinstance(route, Route) and getattr(route, 'include_in_schema', True):
@@ -71,9 +72,9 @@ class EndpointSchemaGenerator(BaseSchemaGenerator):
         self, endpoint_class: Type[BaseEndpoint], method: str, components: Dict[str, Any]
     ) -> Optional[Dict[str, Any]]:
         
-        meta_attr = getattr(endpoint_class, 'meta', EndpointMeta())
+        meta_attr = getattr(endpoint_class, 'meta', None)
         
-        if hasattr(meta_attr, 'func'):
+        if callable(meta_attr):
             meta = meta_attr()
         elif isinstance(meta_attr, EndpointMeta):
             meta = meta_attr
