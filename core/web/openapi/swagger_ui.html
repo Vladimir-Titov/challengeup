@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>ChallengeUp API Documentation</title>
+    <link rel="stylesheet" href="/swagger-static/swagger-ui.css" />
+    <style>
+        /* Кастомные стили для Swagger UI */
+        .swagger-ui .topbar { 
+            background-color: #1a365d;
+            padding: 10px 0;
+        }
+        .swagger-ui .info .title {
+            color: #2c5282;
+        }
+    </style>
+</head>
+<body>
+    <div id="swagger-ui"></div>
+    <script src="/swagger-static/swagger-ui-bundle.js"></script>
+    <script src="/swagger-static/swagger-ui-standalone-preset.js"></script>
+    <script>
+        window.onload = () => {
+            window.ui = SwaggerUIBundle({
+                // Основные настройки
+                url: '/openapi.json',
+                dom_id: '#swagger-ui',
+                
+                // Внешний вид
+                deepLinking: true,  // Поддержка прямых ссылок на операции
+                displayRequestDuration: true,  // Показывать время выполнения запросов
+                defaultModelsExpandDepth: 3,  // Глубина развертывания моделей по умолчанию
+                defaultModelExpandDepth: 3,  // Глубина развертывания конкретной модели
+                docExpansion: 'list',  // Развертывание документации: 'list', 'full', 'none'
+                filter: true,  // Включить поиск по операциям
+                
+                // Настройки запросов
+                tryItOutEnabled: true,  // Включить кнопку "Try it out"
+                requestSnippetsEnabled: true,  // Показывать примеры запросов в разных форматах
+                persistAuthorization: true,  // Сохранять авторизацию между перезагрузками
+                
+                // Настройки отображения
+                showExtensions: true,  // Показывать расширения OpenAPI
+                showCommonExtensions: true,  // Показывать общие расширения
+                layout: "BaseLayout",
+                
+                // Подсветка синтаксиса
+                syntaxHighlight: {
+                    activated: true,
+                    theme: "monokai"
+                },
+
+                // Настройки отображения примеров запросов
+                requestSnippets: {
+                    generators: {
+                        'curl_bash': {
+                            title: 'cURL (bash)',
+                            syntax: 'bash'
+                        },
+                        'curl_powershell': {
+                            title: 'cURL (PowerShell)',
+                            syntax: 'powershell'
+                        },
+                        'python_requests': {
+                            title: 'Python (requests)',
+                            syntax: 'python'
+                        }
+                    },
+                    defaultExpanded: false,
+                    languages: null // Все языки
+                },
+
+                // Предустановки
+                presets: [
+                    SwaggerUIBundle.presets.apis,
+                    SwaggerUIStandalonePreset
+                ],
+
+                // Плагины
+                plugins: [
+                    SwaggerUIBundle.plugins.DownloadUrl
+                ],
+
+                // Обработчики событий
+                onComplete: () => {
+                    console.log('Swagger UI loaded successfully');
+                },
+                
+                // Дополнительные параметры безопасности
+                validatorUrl: null,  // Отключить валидацию схемы (или использовать "https://validator.swagger.io/validator")
+                oauth2RedirectUrl: window.location.origin + '/oauth2-redirect.html'  // URL для OAuth2 редиректа
+            });
+        };
+    </script>
+</body>
+</html> 

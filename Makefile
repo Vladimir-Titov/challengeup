@@ -20,6 +20,10 @@ format:
 fix:
 	@ruff check . --fix
 	@ruff format .
+	@isort .
+
+check:
+	@mypy .
 
 clean:
 	@rm -rf `find . -name __pycache__`

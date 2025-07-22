@@ -5,7 +5,19 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
+    "aiohttp>=3.12.14",
+    "alembic>=1.16.1",
+    "asyncpg>=0.30.0",
+    "colorlog>=6.9.0",
+    "psycopg2-binary>=2.9.10",
+    "pydantic>=2.11.5",
+    "pydantic-settings>=2.10.0",
+    "pyyaml>=6.0.2",
+    "sqlalchemy>=2.0.41",
+    "sqlmodel>=0.0.24",
     "starlette>=0.47.0",
+    "swagger-ui-bundle>=1.1.0",
+    "ujson>=5.10.0",
     "uvicorn>=0.34.3",
     "uvloop>=0.21.0",
 ]
@@ -15,7 +27,8 @@ line-length = 120
 indent-width = 4
 
 [tool.ruff.lint]
-ignore = ["F401"]
+fixable = ["F401"]
+per-file-ignores = { "__init__.py" = ["F401"] }
 
 [tool.ruff.format]
 quote-style = "single"
@@ -23,7 +36,31 @@ indent-style = "space"
 skip-magic-trailing-comma = false
 line-ending = "auto"
 
+[tool.mypy]
+python_version = "3.12"
+warn_return_any = true
+warn_unused_configs = true
+disable_error_code = ["misc"]
+follow_untyped_imports = true
+
+
+[[tool.mypy.overrides]]
+module = "asyncpg"
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = "web.api.*"
+disable_error_code = ["arg-type"]
+
+
+
 [dependency-groups]
 dev = [
+    "isort>=6.0.1",
+    "mypy>=1.16.1",
+    "pip>=25.1.1",
+    "pyannotate>=1.2.0",
     "ruff>=0.11.13",
+    "setuptools>=80.9.0",
+    "types-ujson>=5.10.0.20250326",
 ]
