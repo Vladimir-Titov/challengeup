@@ -1,5 +1,6 @@
 import inspect
 import logging
+from enum import Enum
 from typing import Any, Dict, List, Optional, Type, get_origin, get_args, Union
 
 from pydantic import BaseModel
@@ -30,11 +31,13 @@ class EndpointSchemaGenerator(BaseSchemaGenerator):
 
         components: Dict[str, Dict[str, Any]] = {}
 
+        # Группируем маршруты по путям
+        path_routes: Dict[str, List[Route]] = {}
         for route in routes:
             if isinstance(route, Route) and getattr(route, 'include_in_schema', True):
-                path_info = self._get_path_info(route, components)
-                if path_info:
-                    openapi_schema['paths'][route.path] = path_info
+                if route.path not in path_routes:
+                    path_routes[route.path] = []
+                path_routes[route.path].append(route)
             elif isinstance(route, Mount):
                 sub_schema = self.get_schema(route.routes)
                 for path, path_info in sub_schema.get('paths', {}).items():
@@ -42,6 +45,16 @@ class EndpointSchemaGenerator(BaseSchemaGenerator):
                     openapi_schema['paths'][full_path] = path_info
 
                 components.update(sub_schema.get('components', {}).get('schemas', {}))
+
+        # Обрабатываем сгруппированные маршруты
+        for path, routes_for_path in path_routes.items():
+            path_info = {}
+            for route in routes_for_path:
+                route_info = self._get_path_info(route, components)
+                if route_info:
+                    path_info.update(route_info)
+            if path_info:
+                openapi_schema['paths'][path] = path_info
 
         openapi_schema['components']['schemas'].update(components)
 
@@ -58,13 +71,13 @@ class EndpointSchemaGenerator(BaseSchemaGenerator):
 
         path_info = {}
 
-        for method in route.methods or ['GET']:
-            if method.upper() in ['HEAD', 'OPTIONS']:
-                continue
-                
-            method_info = self._get_method_info(endpoint_class, method.lower(), components)
+        # Получаем список методов, исключая HEAD и OPTIONS
+        methods = {method.lower() for method in (route.methods or ['GET'])} - {'head', 'options'}
+
+        for method in methods:
+            method_info = self._get_method_info(endpoint_class, method, components)
             if method_info:
-                path_info[method.lower()] = method_info
+                path_info[method] = method_info
 
         return path_info if path_info else None
 
@@ -84,11 +97,23 @@ class EndpointSchemaGenerator(BaseSchemaGenerator):
         summary = meta.summary or endpoint_class.__name__
         operation_id = meta.operation_id or self._generate_operation_id_from_class_name(endpoint_class.__name__)
 
+        # Получаем схему ответа заранее
+        response_schema = None
+        if hasattr(endpoint_class, 'schema_response') and endpoint_class.schema_response:
+            response_schema = self._get_response_schema(endpoint_class.schema_response, components)
+
         method_info: Dict[str, Any] = {
             'summary': summary,
             'operationId': operation_id,
             'responses': {
-                '200': {'description': 'Successful response'}
+                '200': {
+                    'description': 'Successful response',
+                    'content': {
+                        getattr(endpoint_class, '_response_media_type', 'application/json'): {
+                            'schema': response_schema if response_schema is not None else {'type': 'object'}
+                        }
+                    }
+                }
             },
         }
 
@@ -124,18 +149,6 @@ class EndpointSchemaGenerator(BaseSchemaGenerator):
             request_body = self._get_request_body(endpoint_class.schema_body, components)
             if request_body:
                 method_info['requestBody'] = request_body
-
-        if hasattr(endpoint_class, 'schema_response') and endpoint_class.schema_response:
-            response_schema = self._get_response_schema(endpoint_class.schema_response, components)
-            if response_schema:
-                method_info['responses']['200'] = {
-                    'description': 'Successful response',
-                    'content': {
-                        endpoint_class._response_media_type: {
-                            'schema': response_schema
-                        }
-                    }
-                }
 
         error_responses = self._get_standard_error_responses(endpoint_class.__name__, method)
         method_info['responses'].update(error_responses)
@@ -320,16 +333,20 @@ class EndpointSchemaGenerator(BaseSchemaGenerator):
     def _get_response_schema(self, schema: Type[BaseModel] | type, components: Dict[str, Any]) -> Dict[str, Any]:
         """Генерирует response схему"""
         origin = get_origin(schema)
+        
+        # Проверяем, является ли схема списком
         if origin is list:
             args = get_args(schema)
-            if args and inspect.isclass(args[0]) and issubclass(args[0], BaseModel):
-                item_schema = self._add_schema_to_components(args[0], components)
-                return {
-                    'type': 'array',
-                    'items': item_schema
-                }
-
-        if inspect.isclass(schema) and issubclass(schema, BaseModel):
+            if args and len(args) == 1:
+                item_type = args[0]
+                if inspect.isclass(item_type) and issubclass(item_type, BaseModel):
+                    item_schema = self._add_schema_to_components(item_type, components)
+                    return {
+                        'type': 'array',
+                        'items': item_schema
+                    }
+        # Проверяем, является ли схема моделью
+        elif inspect.isclass(schema) and issubclass(schema, BaseModel):
             return self._add_schema_to_components(schema, components)
 
         return {'type': 'object'}
@@ -345,6 +362,13 @@ class EndpointSchemaGenerator(BaseSchemaGenerator):
             if non_none_args:
                 annotation = non_none_args[0]
 
+        # Проверяем Enum
+        if inspect.isclass(annotation) and issubclass(annotation, Enum):
+            return {
+                'type': 'string',
+                'enum': [e.value for e in annotation]
+            }
+
         # Базовые типы
         if annotation == str:
             return {'type': 'string'}
@@ -357,22 +381,26 @@ class EndpointSchemaGenerator(BaseSchemaGenerator):
         elif inspect.isclass(annotation) and issubclass(annotation, BaseModel):
             return self._add_schema_to_components(annotation, components)
 
-        return {'type': 'string'}  
+        return {'type': 'string'}
 
     def _add_schema_to_components(self, model: Type[BaseModel], components: Dict[str, Any]) -> Dict[str, Any]:
         schema_name = model.__name__
 
         if schema_name not in components:
-            model_schema = model.model_json_schema()
-            
-            if '$defs' in model_schema:
-                for def_name, def_schema in model_schema['$defs'].items():
-                    fixed_def_schema = self._fix_schema_for_openapi(def_schema)
-                    components[def_name] = fixed_def_schema
-                del model_schema['$defs']
-            
-            fixed_schema = self._fix_schema_for_openapi(model_schema)
-            components[schema_name] = fixed_schema
+            try:
+                model_schema = model.model_json_schema()
+                
+                if '$defs' in model_schema:
+                    for def_name, def_schema in model_schema['$defs'].items():
+                        fixed_def_schema = self._fix_schema_for_openapi(def_schema)
+                        components[def_name] = fixed_def_schema
+                    del model_schema['$defs']
+                
+                fixed_schema = self._fix_schema_for_openapi(model_schema)
+                components[schema_name] = fixed_schema
+            except Exception as e:
+                logger.error(f"Error generating schema for {schema_name}: {e}")
+                return {'type': 'object'}
 
         return {'$ref': f'#/components/schemas/{schema_name}'}
 

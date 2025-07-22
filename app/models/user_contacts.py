@@ -4,6 +4,7 @@ from enum import Enum
 from sqlalchemy import Index, String
 from sqlmodel import Field
 
+from core.types.pydantic_base import BaseUjsonModel
 from .base import BaseSQLModel, challenges_schema
 
 
@@ -17,7 +18,7 @@ class ContactType(Enum):
         return self.value
 
 
-class UserContacts(BaseSQLModel, table=True):
+class UserContacts(BaseSQLModel, BaseUjsonModel, table=True):
     __tablename__ = 'user_contacts'
     __table_args__ = (
         Index('user_contacts_contact_idx', 'contact', unique=False),
@@ -26,7 +27,7 @@ class UserContacts(BaseSQLModel, table=True):
     )
     metadata = challenges_schema
 
-    user_id: uuid.UUID = Field(foreign_key='user.id')
+    user_id: uuid.UUID = Field(foreign_key='challenges.users.id')
     contact_type: ContactType = Field(sa_type=String)
     contact: str = Field(sa_type=String)
 

@@ -1,6 +1,6 @@
 import logging
 from abc import abstractmethod
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Any, AsyncGenerator, Mapping
 
 from pydantic import BaseModel
@@ -28,10 +28,10 @@ class EndpointMeta:
 
 @dataclass
 class RequestParams:
-    path: Mapping[str, Any] = dict()
-    headers: Mapping[str, Any] = dict()
-    query: Mapping[str, Any] = dict()
-    body: Mapping[str, Any] | list[Any] | AsyncGenerator[Any, None] = dict()
+    path: Mapping[str, Any] = field(default_factory=dict)
+    headers: Mapping[str, Any] = field(default_factory=dict)
+    query: Mapping[str, Any] = field(default_factory=dict)
+    body: Mapping[str, Any] | list[Any] | AsyncGenerator[Any, None] = field(default_factory=dict)
 
 
 def parse_params(data: Any, schema: type[BaseModel] | None = None) -> Any:

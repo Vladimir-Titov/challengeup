@@ -34,7 +34,7 @@ def upgrade() -> None:
         schema='challenges',
     )
     op.create_table(
-        'user',
+        'users',
         sa.Column('id', sa.Uuid(), server_default=sa.text('uuid_generate_v4()'), nullable=False),
         sa.Column('created', sa.DateTime(), server_default=sa.text("(now() at time zone 'utc')"), nullable=False),
         sa.Column('updated', sa.DateTime(), server_default=sa.text("(now() at time zone 'utc')"), nullable=False),
@@ -56,7 +56,7 @@ def upgrade() -> None:
         sa.Column('contact', sa.String(), nullable=False),
         sa.ForeignKeyConstraint(
             ['user_id'],
-            ['challenges.user.id'],
+            ['challenges.users.id'],
         ),
         sa.PrimaryKeyConstraint('id'),
         schema='challenges',
