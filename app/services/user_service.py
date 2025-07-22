@@ -1,4 +1,5 @@
 from uuid import UUID
+
 from app.models.user import Users
 from app.repositories.repositories import DBRepositories
 from core.repositories.errors import RowNotFoundError

@@ -2,9 +2,9 @@ from starlette.applications import Starlette
 from starlette.middleware import Middleware
 from starlette.middleware.cors import CORSMiddleware
 
+from core.web.openapi.setup import setup_openapi
 from settings.app import app_config
 from web.lifespans.lifespan import app_lifespan
-from core.web.openapi.setup import setup_openapi
 
 from .lifespans.app_lifespans import app_lifespans
 from .routes import routes

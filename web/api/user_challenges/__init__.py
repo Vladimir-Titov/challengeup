@@ -1,1 +1,7 @@
-from .user_challenges import GetUserChallenges
+from .user_challenges import (
+    CreateUserChallenge,
+    DeleteUserChallengeByID,
+    GetUserChallengeByID,
+    GetUserChallenges,
+    UpdateUserChallengeByID,
+)

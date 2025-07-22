@@ -1,10 +1,10 @@
 import inspect
 import logging
 from enum import Enum
-from typing import Any, Dict, List, Optional, Type, get_origin, get_args, Union
+from typing import Any, Dict, List, Optional, Type, Union, get_args, get_origin
 
 from pydantic import BaseModel
-from starlette.routing import BaseRoute, Route, Mount
+from starlette.routing import BaseRoute, Mount, Route
 from starlette.schemas import BaseSchemaGenerator
 
 from core.web.endpoints.base import BaseEndpoint, EndpointMeta
@@ -13,7 +13,6 @@ logger = logging.getLogger(__name__)
 
 
 class EndpointSchemaGenerator(BaseSchemaGenerator):
-
     def __init__(self, info: Dict[str, Any]):
         self.info = info
         self.components: Dict[str, Dict[str, Any]] = {}
@@ -24,9 +23,7 @@ class EndpointSchemaGenerator(BaseSchemaGenerator):
             'openapi': '3.0.3',
             'info': self.info,
             'paths': {},
-            'components': {
-                'schemas': {}
-            }
+            'components': {'schemas': {}},
         }
 
         components: Dict[str, Dict[str, Any]] = {}
@@ -84,16 +81,15 @@ class EndpointSchemaGenerator(BaseSchemaGenerator):
     def _get_method_info(
         self, endpoint_class: Type[BaseEndpoint], method: str, components: Dict[str, Any]
     ) -> Dict[str, Any] | None:
-        
         meta_attr = getattr(endpoint_class, 'meta', None)
-        
+
         if callable(meta_attr):
             meta = meta_attr()
         elif isinstance(meta_attr, EndpointMeta):
             meta = meta_attr
         else:
             meta = EndpointMeta()
-        
+
         summary = meta.summary or endpoint_class.__name__
         operation_id = meta.operation_id or self._generate_operation_id_from_class_name(endpoint_class.__name__)
 
@@ -112,7 +108,7 @@ class EndpointSchemaGenerator(BaseSchemaGenerator):
                         getattr(endpoint_class, '_response_media_type', 'application/json'): {
                             'schema': response_schema if response_schema is not None else {'type': 'object'}
                         }
-                    }
+                    },
                 }
             },
         }
@@ -125,7 +121,7 @@ class EndpointSchemaGenerator(BaseSchemaGenerator):
             method_info['tags'] = [meta.tag]
 
         parameters = []
-        
+
         if hasattr(endpoint_class, 'schema_query') and endpoint_class.schema_query:
             query_params = self._get_query_parameters(endpoint_class.schema_query, components)
             parameters.extend(query_params)
@@ -154,10 +150,6 @@ class EndpointSchemaGenerator(BaseSchemaGenerator):
         method_info['responses'].update(error_responses)
 
         return method_info
-
-
-
-
 
     def _generate_operation_id_from_class_name(self, class_name: str) -> str:
         """Генерирует operationId из имени класса"""
@@ -190,13 +182,10 @@ class EndpointSchemaGenerator(BaseSchemaGenerator):
                     'application/json': {
                         'schema': {
                             'type': 'object',
-                            'properties': {
-                                'code': {'type': 'string'},
-                                'message': {'type': 'string'}
-                            },
-                            'required': ['code', 'message']
+                            'properties': {'code': {'type': 'string'}, 'message': {'type': 'string'}},
+                            'required': ['code', 'message'],
                         },
-                        'example': {'code': 'validation_error', 'message': 'Validation failed'}
+                        'example': {'code': 'validation_error', 'message': 'Validation failed'},
                     }
                 },
             }
@@ -210,13 +199,10 @@ class EndpointSchemaGenerator(BaseSchemaGenerator):
                     'application/json': {
                         'schema': {
                             'type': 'object',
-                            'properties': {
-                                'code': {'type': 'string'},
-                                'message': {'type': 'string'}
-                            },
-                            'required': ['code', 'message']
+                            'properties': {'code': {'type': 'string'}, 'message': {'type': 'string'}},
+                            'required': ['code', 'message'],
                         },
-                        'example': {'code': 'not_found', 'message': f'{resource} not found'}
+                        'example': {'code': 'not_found', 'message': f'{resource} not found'},
                     }
                 },
             }
@@ -229,13 +215,10 @@ class EndpointSchemaGenerator(BaseSchemaGenerator):
                     'application/json': {
                         'schema': {
                             'type': 'object',
-                            'properties': {
-                                'code': {'type': 'string'},
-                                'message': {'type': 'string'}
-                            },
-                            'required': ['code', 'message']
+                            'properties': {'code': {'type': 'string'}, 'message': {'type': 'string'}},
+                            'required': ['code', 'message'],
                         },
-                        'example': {'code': 'already_exists', 'message': 'Resource already exists'}
+                        'example': {'code': 'already_exists', 'message': 'Resource already exists'},
                     }
                 },
             }
@@ -247,15 +230,12 @@ class EndpointSchemaGenerator(BaseSchemaGenerator):
                 'application/json': {
                     'schema': {
                         'type': 'object',
-                        'properties': {
-                            'code': {'type': 'string'},
-                            'message': {'type': 'string'}
-                        },
-                        'required': ['code', 'message']
+                        'properties': {'code': {'type': 'string'}, 'message': {'type': 'string'}},
+                        'required': ['code', 'message'],
                     },
-                    'example': {'code': 'internal_server_error', 'message': 'Internal Server Error'}
+                    'example': {'code': 'internal_server_error', 'message': 'Internal Server Error'},
                 }
-            }
+            },
         }
 
         return responses
@@ -321,19 +301,12 @@ class EndpointSchemaGenerator(BaseSchemaGenerator):
         """Генерирует request body из Pydantic схемы"""
         schema_ref = self._add_schema_to_components(schema, components)
 
-        return {
-            'required': True,
-            'content': {
-                'application/json': {
-                    'schema': schema_ref
-                }
-            }
-        }
+        return {'required': True, 'content': {'application/json': {'schema': schema_ref}}}
 
     def _get_response_schema(self, schema: Type[BaseModel] | type, components: Dict[str, Any]) -> Dict[str, Any]:
         """Генерирует response схему"""
         origin = get_origin(schema)
-        
+
         # Проверяем, является ли схема списком
         if origin is list:
             args = get_args(schema)
@@ -341,10 +314,7 @@ class EndpointSchemaGenerator(BaseSchemaGenerator):
                 item_type = args[0]
                 if inspect.isclass(item_type) and issubclass(item_type, BaseModel):
                     item_schema = self._add_schema_to_components(item_type, components)
-                    return {
-                        'type': 'array',
-                        'items': item_schema
-                    }
+                    return {'type': 'array', 'items': item_schema}
         # Проверяем, является ли схема моделью
         elif inspect.isclass(schema) and issubclass(schema, BaseModel):
             return self._add_schema_to_components(schema, components)
@@ -358,25 +328,22 @@ class EndpointSchemaGenerator(BaseSchemaGenerator):
         origin = get_origin(annotation)
         if origin is Union:
             args = get_args(annotation)
-            non_none_args = [arg for arg in args if arg != type(None)]
+            non_none_args = [arg for arg in args if arg is not None]
             if non_none_args:
                 annotation = non_none_args[0]
 
         # Проверяем Enum
         if inspect.isclass(annotation) and issubclass(annotation, Enum):
-            return {
-                'type': 'string',
-                'enum': [e.value for e in annotation]
-            }
+            return {'type': 'string', 'enum': [e.value for e in annotation]}
 
         # Базовые типы
-        if annotation == str:
+        if isinstance(annotation, str):
             return {'type': 'string'}
-        elif annotation == int:
+        elif isinstance(annotation, int):
             return {'type': 'integer'}
-        elif annotation == float:
+        elif isinstance(annotation, float):
             return {'type': 'number'}
-        elif annotation == bool:
+        elif isinstance(annotation, bool):
             return {'type': 'boolean'}
         elif inspect.isclass(annotation) and issubclass(annotation, BaseModel):
             return self._add_schema_to_components(annotation, components)
@@ -389,17 +356,17 @@ class EndpointSchemaGenerator(BaseSchemaGenerator):
         if schema_name not in components:
             try:
                 model_schema = model.model_json_schema()
-                
+
                 if '$defs' in model_schema:
                     for def_name, def_schema in model_schema['$defs'].items():
                         fixed_def_schema = self._fix_schema_for_openapi(def_schema)
                         components[def_name] = fixed_def_schema
                     del model_schema['$defs']
-                
+
                 fixed_schema = self._fix_schema_for_openapi(model_schema)
                 components[schema_name] = fixed_schema
             except Exception as e:
-                logger.error(f"Error generating schema for {schema_name}: {e}")
+                logger.error(f'Error generating schema for {schema_name}: {e}')
                 return {'type': 'object'}
 
         return {'$ref': f'#/components/schemas/{schema_name}'}
@@ -409,45 +376,44 @@ class EndpointSchemaGenerator(BaseSchemaGenerator):
             return schema
 
         fixed_schema: Dict[str, Any] = schema.copy()  # type: ignore
-        
+
         if 'enum' in fixed_schema and 'type' not in fixed_schema:
             fixed_schema['type'] = 'string'
-        
+
         if 'anyOf' in fixed_schema:
             any_of = fixed_schema['anyOf']
             if len(any_of) == 2:
                 null_item = None
                 other_item = None
-                
+
                 for item in any_of:
                     if isinstance(item, dict):
                         if item.get('type') == 'null':
                             null_item = item
                         else:
                             other_item = item
-                
+
                 if null_item and other_item:
                     del fixed_schema['anyOf']
                     fixed_schema.update(other_item)  # type: ignore
                     fixed_schema['nullable'] = True
-        
+
         if '$ref' in fixed_schema:
             ref_value = fixed_schema['$ref']
             if '#/$defs/' in ref_value:
                 ref_name = ref_value.split('#/$defs/')[-1]
                 fixed_schema['$ref'] = f'#/components/schemas/{ref_name}'  # type: ignore
-        
+
         if 'properties' in fixed_schema:
             fixed_properties = {}
             for prop_name, prop_schema in fixed_schema['properties'].items():  # type: ignore
                 fixed_properties[prop_name] = self._fix_schema_for_openapi(prop_schema)
             fixed_schema['properties'] = fixed_properties
-        
+
         if 'items' in fixed_schema:
             fixed_schema['items'] = self._fix_schema_for_openapi(fixed_schema['items'])  # type: ignore
-        
+
         if 'additionalProperties' in fixed_schema and isinstance(fixed_schema['additionalProperties'], dict):
             fixed_schema['additionalProperties'] = self._fix_schema_for_openapi(fixed_schema['additionalProperties'])  # type: ignore
-        
-        return fixed_schema
 
+        return fixed_schema

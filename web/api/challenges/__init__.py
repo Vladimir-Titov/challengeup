@@ -1,1 +1,1 @@
-from .challenges import GetChallenges, CreateChallenge, UpdateChallengeByID, GetChallengeByID, DeleteChallengeByID
+from .challenges import CreateChallenge, DeleteChallengeByID, GetChallengeByID, GetChallenges, UpdateChallengeByID

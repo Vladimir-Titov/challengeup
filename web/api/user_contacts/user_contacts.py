@@ -1,5 +1,5 @@
-from functools import partial
 import logging
+from functools import partial
 from typing import Any
 
 from app.models.user_contacts import UserContacts
@@ -8,6 +8,7 @@ from core.web.endpoints.base import EndpointMeta, RequestParams
 from core.web.endpoints.json import JSONEndpoint
 from web.api.schemas import GetByID
 from web.mixins.challenges_mixin import ChallengesMixin
+
 from . import schemas
 
 logger = logging.getLogger(__name__)

@@ -1,4 +1,4 @@
-from typing import Any, get_origin, get_args
+from typing import Any, get_args, get_origin
 
 from pydantic import BaseModel
 from starlette.responses import JSONResponse, Response

@@ -1,5 +1,5 @@
-from functools import partial
 import logging
+from functools import partial
 from typing import Any
 
 from app.models.challenges import Challenges
@@ -8,6 +8,7 @@ from core.web.endpoints.base import EndpointMeta, RequestParams
 from core.web.endpoints.json import JSONEndpoint
 from web.api.schemas import GetByID
 from web.mixins.challenges_mixin import ChallengesMixin
+
 from . import schemas
 
 logger = logging.getLogger(__name__)
@@ -64,4 +65,3 @@ class DeleteChallengeByID(JSONEndpoint, ChallengesMixin):
 
     async def execute(self, params: RequestParams) -> Any:
         return await self.challenges_service.delete_challenge_by_id(challenge_id=params.path['id'])
-        

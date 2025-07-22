@@ -1,4 +1,5 @@
 from uuid import UUID
+
 from app.models.user_contacts import UserContacts
 from app.repositories.repositories import DBRepositories
 from core.repositories.errors import RowNotFoundError

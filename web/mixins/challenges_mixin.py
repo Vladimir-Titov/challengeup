@@ -1,7 +1,7 @@
 from app.repositories.repositories import DBRepositories
 from app.services.challenges_service import ChallengesService
-from app.services.user_contacts_service import UserContactsService
 from app.services.user_challenges_service import UserChallengesService
+from app.services.user_contacts_service import UserContactsService
 from app.services.user_service import UserService
 from core.web.endpoints.base import BaseEndpoint
 

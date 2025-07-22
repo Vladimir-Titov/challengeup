@@ -1,6 +1,6 @@
 from starlette.routing import Route
 
-from web.api import challenges, users, user_contacts, user_challenges
+from web.api import challenges, user_challenges, user_contacts, users
 
 routes = [
     # Challenges routes
@@ -24,8 +24,8 @@ routes = [
     Route('/users/{user_id}/contacts', user_contacts.GetContactsByUserID, methods=['GET']),
     # User challenges routes
     Route('/user-challenges', user_challenges.GetUserChallenges, methods=['GET']),
-    # Route('/user-challenges', user_challenges.CreateUserChallenge, methods=['POST']),
-    # Route('/user-challenges/{id}', user_challenges.GetUserChallengeByID, methods=['GET']),
-    # Route('/user-challenges/{id}', user_challenges.UpdateUserChallengeByID, methods=['PATCH']),
-    # Route('/user-challenges/{id}', user_challenges.DeleteUserChallengeByID, methods=['DELETE']),
+    Route('/user-challenges', user_challenges.CreateUserChallenge, methods=['POST']),
+    Route('/user-challenges/{id}', user_challenges.GetUserChallengeByID, methods=['GET']),
+    Route('/user-challenges/{id}', user_challenges.UpdateUserChallengeByID, methods=['PATCH']),
+    Route('/user-challenges/{id}', user_challenges.DeleteUserChallengeByID, methods=['DELETE']),
 ]

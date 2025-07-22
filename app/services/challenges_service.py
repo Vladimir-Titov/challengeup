@@ -1,4 +1,5 @@
 from uuid import UUID
+
 from app.models.challenges import Challenges
 from app.repositories.repositories import DBRepositories
 from core.repositories.errors import RowNotFoundError

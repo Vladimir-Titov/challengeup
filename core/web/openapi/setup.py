@@ -1,10 +1,11 @@
-from typing import Dict, Any, List, Optional, Sequence
 import os
-from starlette.routing import Route, Mount, BaseRoute
-from starlette.responses import JSONResponse, HTMLResponse
-from starlette.requests import Request
-from starlette.staticfiles import StaticFiles
+from typing import Any, Dict, List, Optional, Sequence
+
 import swagger_ui_bundle
+from starlette.requests import Request
+from starlette.responses import HTMLResponse, JSONResponse
+from starlette.routing import BaseRoute, Mount, Route
+from starlette.staticfiles import StaticFiles
 
 from .generator import EndpointSchemaGenerator
 
@@ -17,10 +18,10 @@ async def swagger_ui(request: Request) -> HTMLResponse:
     """Отдает HTML страницу с Swagger UI"""
     current_dir = os.path.dirname(os.path.abspath(__file__))
     html_path = os.path.join(current_dir, 'swagger_ui.html')
-    
+
     with open(html_path, 'r', encoding='utf-8') as f:
         html_content = f.read()
-    
+
     return HTMLResponse(content=html_content)
 
 
@@ -29,7 +30,7 @@ def setup_openapi(
     info: Optional[Dict[str, Any]] = None,
     openapi_url: str = '/openapi.json',
     docs_url: str = '/docs',
-    swagger_static_url: str = '/swagger-static'
+    swagger_static_url: str = '/swagger-static',
 ) -> List[BaseRoute]:
     """
     Настраивает OpenAPI для приложения и возвращает дополнительные маршруты
@@ -48,7 +49,7 @@ def setup_openapi(
         info = {'title': 'ChallengeUp API', 'version': '1.0.0', 'description': 'API для платформы ChallengeUp'}
 
     schema_generator = EndpointSchemaGenerator(info)
-    
+
     # Создаем endpoint функцию с замыканием
     async def openapi_endpoint(request: Request):
         return await get_openapi_schema(request, schema_generator, routes)
@@ -60,7 +61,7 @@ def setup_openapi(
     openapi_routes = [
         Route(openapi_url, endpoint=openapi_endpoint, methods=['GET'], include_in_schema=False),
         Route(docs_url, endpoint=swagger_ui, methods=['GET'], include_in_schema=False),
-        Mount(swagger_static_url, app=StaticFiles(directory=swagger_static_dir), name="swagger_static")
+        Mount(swagger_static_url, app=StaticFiles(directory=swagger_static_dir), name='swagger_static'),
     ]
 
     return openapi_routes

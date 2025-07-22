@@ -1,6 +1,7 @@
 from uuid import UUID
-from app.repositories.repositories import DBRepositories
+
 from app.models.user_challenges import UserChallenges
+from app.repositories.repositories import DBRepositories
 
 
 class UserChallengesService:

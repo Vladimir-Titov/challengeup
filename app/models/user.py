@@ -2,6 +2,7 @@ from sqlalchemy import String
 from sqlmodel import Field
 
 from core.types.pydantic_base import BaseUjsonModel
+
 from .base import BaseSQLModel, challenges_schema
 
 

@@ -1,5 +1,7 @@
 from uuid import UUID
+
 from pydantic import BaseModel
+
 from app.models.user_contacts import ContactType
 
 

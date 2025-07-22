@@ -1,1 +1,1 @@
-from . import challenges, users, user_contacts, user_challenges
+from . import challenges, user_challenges, user_contacts, users

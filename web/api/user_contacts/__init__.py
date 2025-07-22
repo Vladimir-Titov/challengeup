@@ -1,8 +1,8 @@
 from .user_contacts import (
-    GetUserContacts,
     CreateUserContact,
-    UpdateUserContactByID,
-    GetUserContactByID,
     DeleteUserContactByID,
     GetContactsByUserID,
+    GetUserContactByID,
+    GetUserContacts,
+    UpdateUserContactByID,
 )
