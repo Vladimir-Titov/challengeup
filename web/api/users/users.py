@@ -7,7 +7,7 @@ from core.utils.types import partial_apply
 from core.web.endpoints.base import EndpointMeta, RequestParams
 from core.web.endpoints.json import JSONEndpoint
 from web.api.schemas import GetByID
-from web.mixins.user_service_mixin import UserServiceMixin
+from web.mixins.challenges_mixin import ChallengesMixin
 from . import schemas
 
 logger = logging.getLogger(__name__)
@@ -15,7 +15,7 @@ logger = logging.getLogger(__name__)
 meta = partial(EndpointMeta, tag='users')
 
 
-class GetUsers(JSONEndpoint, UserServiceMixin):
+class GetUsers(JSONEndpoint, ChallengesMixin):
     meta = meta(summary='Get users')
 
     schema_query = schemas.GetUsersQuery
@@ -25,7 +25,7 @@ class GetUsers(JSONEndpoint, UserServiceMixin):
         return await self.user_service.get_users(**params.query)
 
 
-class CreateUser(JSONEndpoint, UserServiceMixin):
+class CreateUser(JSONEndpoint, ChallengesMixin):
     meta = meta(summary='Create user')
 
     schema_body = partial_apply(Users, only=['first_name', 'last_name', 'full_name'])
@@ -35,7 +35,7 @@ class CreateUser(JSONEndpoint, UserServiceMixin):
         return await self.user_service.create_user(**params.body)
 
 
-class UpdateUserByID(JSONEndpoint, UserServiceMixin):
+class UpdateUserByID(JSONEndpoint, ChallengesMixin):
     meta = meta(summary='Update user by id')
 
     schema_path = GetByID
@@ -46,7 +46,7 @@ class UpdateUserByID(JSONEndpoint, UserServiceMixin):
         return await self.user_service.update_user_by_id(user_id=params.path['id'], **params.body)
 
 
-class GetUserByID(JSONEndpoint, UserServiceMixin):
+class GetUserByID(JSONEndpoint, ChallengesMixin):
     meta = meta(summary='Get user by id')
 
     schema_path = GetByID
@@ -56,7 +56,7 @@ class GetUserByID(JSONEndpoint, UserServiceMixin):
         return await self.user_service.get_user_by_id(user_id=params.path['id'])
 
 
-class DeleteUserByID(JSONEndpoint, UserServiceMixin):
+class DeleteUserByID(JSONEndpoint, ChallengesMixin):
     meta = meta(summary='Delete user by id')
 
     schema_path = GetByID

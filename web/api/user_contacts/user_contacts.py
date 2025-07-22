@@ -7,7 +7,7 @@ from core.utils.types import partial_apply
 from core.web.endpoints.base import EndpointMeta, RequestParams
 from core.web.endpoints.json import JSONEndpoint
 from web.api.schemas import GetByID
-from web.mixins.user_contacts_service_mixin import UserContactsServiceMixin
+from web.mixins.challenges_mixin import ChallengesMixin
 from . import schemas
 
 logger = logging.getLogger(__name__)
@@ -15,7 +15,7 @@ logger = logging.getLogger(__name__)
 meta = partial(EndpointMeta, tag='user_contacts')
 
 
-class GetUserContacts(JSONEndpoint, UserContactsServiceMixin):
+class GetUserContacts(JSONEndpoint, ChallengesMixin):
     meta = meta(summary='Get user contacts')
 
     schema_query = schemas.GetUserContactsQuery
@@ -25,7 +25,7 @@ class GetUserContacts(JSONEndpoint, UserContactsServiceMixin):
         return await self.user_contacts_service.get_user_contacts(**params.query)
 
 
-class CreateUserContact(JSONEndpoint, UserContactsServiceMixin):
+class CreateUserContact(JSONEndpoint, ChallengesMixin):
     meta = meta(summary='Create user contact')
 
     schema_body = partial_apply(UserContacts, only=['user_id', 'contact_type', 'contact'])
@@ -35,7 +35,7 @@ class CreateUserContact(JSONEndpoint, UserContactsServiceMixin):
         return await self.user_contacts_service.create_user_contact(**params.body)
 
 
-class UpdateUserContactByID(JSONEndpoint, UserContactsServiceMixin):
+class UpdateUserContactByID(JSONEndpoint, ChallengesMixin):
     meta = meta(summary='Update user contact by id')
 
     schema_path = GetByID
@@ -46,7 +46,7 @@ class UpdateUserContactByID(JSONEndpoint, UserContactsServiceMixin):
         return await self.user_contacts_service.update_user_contact_by_id(contact_id=params.path['id'], **params.body)
 
 
-class GetUserContactByID(JSONEndpoint, UserContactsServiceMixin):
+class GetUserContactByID(JSONEndpoint, ChallengesMixin):
     meta = meta(summary='Get user contact by id')
 
     schema_path = GetByID
@@ -56,7 +56,7 @@ class GetUserContactByID(JSONEndpoint, UserContactsServiceMixin):
         return await self.user_contacts_service.get_user_contact_by_id(contact_id=params.path['id'])
 
 
-class DeleteUserContactByID(JSONEndpoint, UserContactsServiceMixin):
+class DeleteUserContactByID(JSONEndpoint, ChallengesMixin):
     meta = meta(summary='Delete user contact by id')
     schema_path = GetByID
     schema_response = UserContacts
@@ -65,7 +65,7 @@ class DeleteUserContactByID(JSONEndpoint, UserContactsServiceMixin):
         return await self.user_contacts_service.delete_user_contact_by_id(contact_id=params.path['id'])
 
 
-class GetContactsByUserID(JSONEndpoint, UserContactsServiceMixin):
+class GetContactsByUserID(JSONEndpoint, ChallengesMixin):
     meta = meta(summary='Get contacts by user id')
 
     schema_path = schemas.GetContactsByUserIDPath

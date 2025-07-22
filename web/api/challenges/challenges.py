@@ -7,7 +7,7 @@ from core.utils.types import partial_apply
 from core.web.endpoints.base import EndpointMeta, RequestParams
 from core.web.endpoints.json import JSONEndpoint
 from web.api.schemas import GetByID
-from web.mixins.challenges_service_mixin import ChallengesServiceMixin
+from web.mixins.challenges_mixin import ChallengesMixin
 from . import schemas
 
 logger = logging.getLogger(__name__)
@@ -15,7 +15,7 @@ logger = logging.getLogger(__name__)
 meta = partial(EndpointMeta, tag='challenges')
 
 
-class GetChallenges(JSONEndpoint, ChallengesServiceMixin):
+class GetChallenges(JSONEndpoint, ChallengesMixin):
     meta = meta(summary='Get challenges')
 
     schema_query = schemas.GetChallengesQuery
@@ -25,7 +25,7 @@ class GetChallenges(JSONEndpoint, ChallengesServiceMixin):
         return await self.challenges_service.get_challenges(**params.query)
 
 
-class CreateChallenge(JSONEndpoint, ChallengesServiceMixin):
+class CreateChallenge(JSONEndpoint, ChallengesMixin):
     meta = meta(summary='Create challenge')
 
     schema_body = partial_apply(Challenges, only=['title', 'description'])
@@ -35,7 +35,7 @@ class CreateChallenge(JSONEndpoint, ChallengesServiceMixin):
         return await self.challenges_service.create_challenge(**params.body)
 
 
-class UpdateChallengeByID(JSONEndpoint, ChallengesServiceMixin):
+class UpdateChallengeByID(JSONEndpoint, ChallengesMixin):
     meta = meta(summary='Update challenge by id')
 
     schema_path = GetByID
@@ -46,7 +46,7 @@ class UpdateChallengeByID(JSONEndpoint, ChallengesServiceMixin):
         return await self.challenges_service.update_challenge_by_id(challenge_id=params.path['id'], **params.body)
 
 
-class GetChallengeByID(JSONEndpoint, ChallengesServiceMixin):
+class GetChallengeByID(JSONEndpoint, ChallengesMixin):
     meta = meta(summary='Get challenge by id')
 
     schema_path = GetByID
@@ -56,7 +56,7 @@ class GetChallengeByID(JSONEndpoint, ChallengesServiceMixin):
         return await self.challenges_service.get_challenge_by_id(challenge_id=params.path['id'])
 
 
-class DeleteChallengeByID(JSONEndpoint, ChallengesServiceMixin):
+class DeleteChallengeByID(JSONEndpoint, ChallengesMixin):
     meta = meta(summary='Delete challenge by id')
 
     schema_path = GetByID
