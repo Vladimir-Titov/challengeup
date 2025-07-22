@@ -70,7 +70,7 @@ class EndpointSchemaGenerator(BaseSchemaGenerator):
 
     def _get_method_info(
         self, endpoint_class: Type[BaseEndpoint], method: str, components: Dict[str, Any]
-    ) -> Optional[Dict[str, Any]]:
+    ) -> Dict[str, Any] | None:
         
         meta_attr = getattr(endpoint_class, 'meta', None)
         
@@ -84,7 +84,7 @@ class EndpointSchemaGenerator(BaseSchemaGenerator):
         summary = meta.summary or endpoint_class.__name__
         operation_id = meta.operation_id or self._generate_operation_id_from_class_name(endpoint_class.__name__)
 
-        method_info = {
+        method_info: Dict[str, Any] = {
             'summary': summary,
             'operationId': operation_id,
             'responses': {
@@ -131,7 +131,7 @@ class EndpointSchemaGenerator(BaseSchemaGenerator):
                 method_info['responses']['200'] = {
                     'description': 'Successful response',
                     'content': {
-                        'application/json': {
+                        endpoint_class._response_media_type: {
                             'schema': response_schema
                         }
                     }

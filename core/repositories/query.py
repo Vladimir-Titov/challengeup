@@ -59,7 +59,7 @@ def search(
     else:
         query = base_query.select()
         # When using base_query, we need to use sa.column to reference columns in the subquery context
-        column_getter = lambda col_name: sa.column(col_name)
+        column_getter = lambda col_name: sa.column(col_name)  # noqa: E731
         logger.debug('Using sa.column for column_getter')
 
     if order_by:
@@ -91,7 +91,11 @@ def get_by_id(table: sa.Table, entity_id: int | UUID | str) -> Select:
 
 def update(table: sa.Table, **kwargs) -> sa.Update:
     processed_kwargs = _process_payload(kwargs)
-    return table.update().values(updated=datetime.datetime.utcnow(), **processed_kwargs).returning(table)
+    if isinstance(processed_kwargs, dict):
+        update = table.update().values(updated=datetime.datetime.utcnow(), **processed_kwargs).returning(table)
+    else:
+        update = table.update().values(updated=datetime.datetime.utcnow(), *processed_kwargs).returning(table)
+    return update
 
 
 def update_by_id(table: sa.Table, entity_id: int | UUID | str, **kwargs) -> sa.Update:
