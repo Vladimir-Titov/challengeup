@@ -1,1 +1,2 @@
-from .users import CreateUser, DeleteUserByID, GetUserByID, GetUsers, UpdateUserByID
+from .users import (CreateUser, DeleteUserByID, GetUserByID, GetUsers,
+                    UpdateUserByID)

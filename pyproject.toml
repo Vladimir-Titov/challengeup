@@ -66,3 +66,6 @@ dev = [
     "setuptools>=80.9.0",
     "types-ujson>=5.10.0.20250326",
 ]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
