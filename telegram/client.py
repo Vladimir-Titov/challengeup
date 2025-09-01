@@ -15,10 +15,10 @@ class TelegramClient:
             async with session.get(url) as response:
                 return await response.json()
 
-    async def get_updates(self):
+    async def get_updates(self, offset: int = 3000, limit: int = 100, timeout: int = 10):
         url = urljoin(self.base_url, f'/bot{self.token}/getUpdates')
         async with aiohttp.ClientSession() as session:
-            async with session.get(url, params={'timeout': 10, 'offset': 3000, 'limit': 100}) as response:
+            async with session.get(url, params={'timeout': timeout, 'offset': offset, 'limit': limit}) as response:
                 return await response.json()
 
 

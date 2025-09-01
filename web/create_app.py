@@ -36,3 +36,13 @@ class AppBuilder:
         )
 
         return app
+
+
+class TelegramAppBuilder:
+    @classmethod
+    def create_app(cls) -> Starlette:
+        app = Starlette(
+            debug=app_config.debug,
+        )
+
+        return app
