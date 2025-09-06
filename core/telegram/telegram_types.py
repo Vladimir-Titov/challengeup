@@ -17,7 +17,12 @@ class Chat(TypedDict, total=False):
     first_name: str
     username: str
     type: str
-    username: str
+
+
+class MessageEntity(TypedDict, total=False):
+    type: str
+    offset: int
+    length: int
 
 
 class Message(TypedDict, total=False):
@@ -26,6 +31,7 @@ class Message(TypedDict, total=False):
     date: int
     chat: Chat
     text: str
+    entities: list[MessageEntity]
 
 
 class Update(TypedDict, total=False):

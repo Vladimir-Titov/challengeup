@@ -58,20 +58,17 @@ def handle_exit(server: Optional[uvicorn.Server], loop: Optional[asyncio.Abstrac
 
 @click.group()
 def cli():
-    """Утилита командной строки для управления ChallengeUp."""
     pass
 
 
 @cli.command('start-web')
 def start_web():
-    """Запустить веб-сервер API."""
     server = create_server()
     run_server(server)
 
 
 @cli.command('start-telegram')
 def start_telegram():
-    """Запустить Telegram бота."""
     server = create_telegram_server()
     run_server(server)
 

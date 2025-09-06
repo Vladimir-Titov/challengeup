@@ -5,6 +5,7 @@ from starlette.middleware.cors import CORSMiddleware
 from core.web.openapi.setup import setup_openapi
 from settings.app import app_config
 from web.lifespans.lifespan import app_lifespan
+from web.lifespans.telegram_lifespans import telegram_lifespans
 
 from .lifespans.app_lifespans import app_lifespans
 from .routes import routes
@@ -39,10 +40,15 @@ class AppBuilder:
 
 
 class TelegramAppBuilder:
+    lifespan = app_lifespan(lifespans=telegram_lifespans.all)
+    middlewares = [Middleware(CORSMiddleware, **app_config.cors_settings)]
+
     @classmethod
     def create_app(cls) -> Starlette:
         app = Starlette(
             debug=app_config.debug,
+            lifespan=cls.lifespan,
+            middleware=cls.middlewares,
         )
 
         return app
