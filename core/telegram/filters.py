@@ -1,5 +1,6 @@
-from core.telegram.telegram_types import Message
 import re
+
+from core.telegram.telegram_types import Message
 
 
 def regex_match(regex: str, message: Message) -> bool:
