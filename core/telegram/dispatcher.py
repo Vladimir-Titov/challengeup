@@ -1,7 +1,10 @@
 import asyncio
+from functools import partial
 import logging
 from dataclasses import dataclass
-
+from collections import namedtuple
+from textwrap import wrap
+from .filters import regex_match, command_match
 from .client import TelegramClient
 from .message import Message
 from .telegram_types import Update
@@ -14,45 +17,31 @@ class UpdateFilters:
     timeout: int = 15
 
 
+HandlerRoute = namedtuple('HandlerRoute', ['match_func', 'handler'])
+
 logger = logging.getLogger(__name__)
 
 
 class Dispatcher:
-    _instance = None
-    bot_commands_handlers = {}
-
-    def __new__(cls, *args, **kwargs):
-        if cls._instance is None:
-            cls._instance = super().__new__(cls)
-        return cls._instance
-
-    @classmethod
-    def get_instance(cls):
-        return cls._instance
-
-    def __init__(self, client: TelegramClient):
+    def __init__(self):
         self.update_filters = UpdateFilters()
-        self.client = client
+        self.routes = []
 
-    async def _handle_update(self, update: Update):
-        logger.debug(f'Received update: {update}')
-        message = Message(update['message'], self.client)
-        if update['message']['text'] in self.bot_commands_handlers:
-            logger.debug(f'Found command: {update["message"]["text"]}')
-            logger.debug(f'Bot commands handlers: {self.bot_commands_handlers}')
-            handler = self.bot_commands_handlers[update['message']['text']]
-            await handler(message)
+    async def _dispatch(self, update: Update, client: TelegramClient):
+        logger.debug('Received update: %s', update)
+        message = Message(update['message'], client)
+        for match_func, handler in self.routes:
+            if match_func(update['message']):
+                await handler(message)
+                break
         else:
-            await self.client.send_message(
-                chat_id=update['message']['chat']['id'],
-                text='Unknown message',
-            )
+            logger.debug('Not founds handlers for message with update_id: %s', update['update_id'])
         self.update_filters.offset = update['update_id'] + 1
-        logger.debug(f'Updated offset: {self.update_filters.offset}')
+        logger.debug('Updated offset: %s', self.update_filters.offset)
 
-    async def run(self):
+    async def polling(self, client: TelegramClient):
         while True:
-            updates = await self.client.get_updates(
+            updates = await client.get_updates(
                 offset=self.update_filters.offset,
                 limit=self.update_filters.limit,
                 timeout=self.update_filters.timeout,
@@ -62,16 +51,20 @@ class Dispatcher:
                 continue
 
             for update in updates['result']:
-                await self._handle_update(update)
+                try:
+                    await self._dispatch(update, client)
+                except Exception as e:
+                    logger.error('Error dispatching update: %s', e)
 
-    def bot_command(self, commands: list[str]):
+    def register(self, regex: str | None = None, commands: list[str] | None = None):
         def wrapper(func):
-            async def _wrapper(message: Message):
-                return await func(message)
+            if regex:
+                match_func = partial(regex_match, regex)
+                self.routes.append(HandlerRoute(match_func=match_func, handler=func))
 
-            for command in commands:
-                self.bot_commands_handlers[command] = _wrapper
-
-            return _wrapper
+            if commands:
+                match_func = partial(command_match, commands)
+                self.routes.append(HandlerRoute(match_func=match_func, handler=func))
+            return func
 
         return wrapper

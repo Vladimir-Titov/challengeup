@@ -9,6 +9,7 @@ from web.lifespans.telegram_lifespans import telegram_lifespans
 
 from .lifespans.app_lifespans import app_lifespans
 from .routes import routes
+from core.telegram.dispatcher import Dispatcher
 
 
 class AppBuilder:

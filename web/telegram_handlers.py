@@ -1,9 +1,9 @@
 from core.telegram.dispatcher import Dispatcher
 from core.telegram.message import Message
 
-dp = Dispatcher.get_instance()
+dp = Dispatcher()
 
 
-@dp.bot_command(['/start'])
+@dp.register(commands=['/start', '/help'])
 async def init_handlers(message: Message):
-    await message.reply('Hello, world!')
+    await message.reply('Hello, world from routing')

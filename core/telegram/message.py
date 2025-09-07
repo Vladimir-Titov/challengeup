@@ -7,11 +7,5 @@ class Message:
         self.message = message
         self.client = client
 
-    def __str__(self):
-        return self.message
-
-    def __repr__(self):
-        return self.message
-
     async def reply(self, text: str):
-        return self.client.send_message(self.message['chat']['id'], text)
+        return await self.client.send_message(self.message['chat']['id'], text)

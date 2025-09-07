@@ -6,7 +6,7 @@ from typing import Any, AsyncContextManager, AsyncIterator, Callable
 from starlette.applications import Starlette
 
 from core.telegram.client import TelegramClient
-from core.telegram.dispatcher import Dispatcher
+from web.telegram_handlers import dp
 
 logger = logging.getLogger(__name__)
 
@@ -15,12 +15,10 @@ def dispatcher_init(app_attribute_name: str, config: dict[str, Any]) -> Callable
     @asynccontextmanager
     async def _dispatcher(app: Starlette) -> AsyncIterator[None]:
         client = TelegramClient(bot_token=config['token'], base_url=config['base_url'])
-        dispatcher = Dispatcher(client)
-        import web.telegram_handlers
 
-        task = asyncio.create_task(dispatcher.run())
+        task = asyncio.create_task(dp.polling(client=client))
         logger.debug('Telegram dispatcher started')
-        yield {app_attribute_name: dispatcher}
+        yield {app_attribute_name: dp}
         task.cancel()
         logger.debug('Telegram dispatcher closed')
 
