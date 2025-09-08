@@ -34,6 +34,25 @@ class Message(TypedDict, total=False):
     entities: list[MessageEntity]
 
 
+class CallbackQuery(TypedDict, total=False):
+    id: str
+    from_: User
+    message: Message
+    chat_instance: str
+    data: str
+
+
 class Update(TypedDict, total=False):
     update_id: int
     message: Message
+    callback_query: CallbackQuery
+
+
+class InlineKeyboardButton(TypedDict, total=False):
+    text: str
+    url: str
+    callback_data: str
+
+
+class InlineKeyboardMarkup(TypedDict, total=False):
+    inline_keyboard: list[list[InlineKeyboardButton]]

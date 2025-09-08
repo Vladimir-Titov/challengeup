@@ -18,6 +18,7 @@ def dispatcher_init(app_attribute_name: str, config: dict[str, Any]) -> Callable
 
         task = asyncio.create_task(dp.polling(client=client))
         logger.debug('Telegram dispatcher started')
+        dp.ctx = app
         yield {app_attribute_name: dp}
         task.cancel()
         logger.debug('Telegram dispatcher closed')

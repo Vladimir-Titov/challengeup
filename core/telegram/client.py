@@ -1,4 +1,5 @@
 import asyncio
+from typing import Any
 from urllib.parse import urljoin
 
 import aiohttp
@@ -23,10 +24,15 @@ class TelegramClient:
             async with session.get(url, params={'timeout': timeout, 'offset': offset, 'limit': limit}) as response:
                 return await response.json()
 
-    async def send_message(self, chat_id: int, text: str):
+    async def send_message(self, chat_id: int, text: str, reply_markup: dict[str, Any] | None = None):
         url = urljoin(self.base_url, f'/bot{self.bot_token}/sendMessage')
+        data = {'chat_id': chat_id, 'text': text, 'reply_markup': reply_markup}
+        data = {key: value for key, value in data.items() if value is not None}
         async with aiohttp.ClientSession() as session:
-            async with session.post(url, json={'chat_id': chat_id, 'text': text}) as response:
+            async with session.post(
+                url,
+                json=data,
+            ) as response:
                 return await response.json()
 
 
